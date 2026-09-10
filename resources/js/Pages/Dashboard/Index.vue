@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Head, router, Link, usePage } from '@inertiajs/vue3';
 import Navbar from '@/Components/Navbar.vue';
 import Footer from '@/Components/Footer.vue';
@@ -376,6 +376,22 @@ const handleResetStaffPassword = () => {
   );
 };
 
+const profileDropdownRef = ref(null);
+
+const handleProfileClickOutside = (event) => {
+  if (profileDropdownRef.value && !profileDropdownRef.value.contains(event.target)) {
+    isProfileMenuOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleProfileClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleProfileClickOutside);
+});
+
 const handleLogout = () => {
   if (confirm('Are you sure you want to log out of the Admin Dashboard?')) {
     router.post(route('logout'));
@@ -389,9 +405,138 @@ const handleLogout = () => {
   <div class="min-h-screen flex flex-col bg-[#070709] text-zinc-100 font-sans selection:bg-red-600 selection:text-white">
     <Navbar />
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       
-      <!-- Top Command Header -->
+      <!-- ============================================================== -->
+      <!-- Dedicated Admin Top Operations & Profile Bar (Above ADIHEX div)-->
+      <!-- ============================================================== -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#0e0e12]/95 border border-zinc-800 shadow-xl backdrop-blur-xl relative z-30">
+        <!-- Left: Portal Title & Status -->
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 to-red-600/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
+            <ShieldCheck class="w-5 h-5 text-amber-400" />
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white flex items-center gap-2">
+              <span>Veneno Operations Command</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[9px] font-mono font-bold uppercase tracking-wider flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                Admin Verified
+              </span>
+            </div>
+            <div class="text-[11px] text-zinc-400 font-mono">
+              Signed in as <strong class="text-zinc-200">{{ authUser.name || 'Administrator' }}</strong> ({{ authUser.email || 'admin@venenoautocare.com' }})
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Admin Profile Chip & Direct Quick Controls -->
+        <div class="flex flex-wrap items-center gap-2.5 relative" ref="profileDropdownRef">
+          <!-- Direct Quick Change Password Button -->
+          <button
+            type="button"
+            @click="isSecurityModalOpen = true; securityModalTab = 'my_password'"
+            class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-sm cursor-pointer active:scale-95"
+            title="Change Admin Password"
+          >
+            <KeyRound class="w-3.5 h-3.5 text-amber-400" />
+            <span class="hidden sm:inline">Change Password</span>
+          </button>
+
+          <!-- Direct Quick Staff Accounts Button -->
+          <button
+            type="button"
+            @click="isSecurityModalOpen = true; securityModalTab = 'staff_accounts'"
+            class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-sm cursor-pointer active:scale-95"
+            title="Manage Staff Accounts & Passwords"
+          >
+            <UserCog class="w-3.5 h-3.5 text-blue-400" />
+            <span class="hidden md:inline">Staff Passwords ({{ users.length }})</span>
+          </button>
+
+          <!-- Direct Quick Logout Button -->
+          <button
+            type="button"
+            @click="handleLogout"
+            class="px-3.5 py-2 rounded-xl bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 hover:border-red-600 text-red-300 hover:text-white text-xs font-bold flex items-center gap-2 transition-all shadow-sm cursor-pointer active:scale-95"
+            title="Log Out of Dashboard"
+          >
+            <LogOut class="w-3.5 h-3.5 text-red-400" />
+            <span>Log Out</span>
+          </button>
+
+          <!-- Profile Dropdown Trigger -->
+          <div class="relative">
+            <button
+              type="button"
+              @click.stop="isProfileMenuOpen = !isProfileMenuOpen"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-amber-500/50 hover:border-amber-400 text-zinc-100 transition-all shadow-md cursor-pointer"
+              title="Admin Menu"
+            >
+              <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-500/30 to-red-600/30 border border-amber-500/60 flex items-center justify-center text-amber-300 font-bold text-[11px] uppercase shadow-inner">
+                {{ authUser.name ? authUser.name.charAt(0) : 'A' }}
+              </div>
+              <span class="px-1.5 py-0.2 rounded bg-red-600/25 text-red-300 border border-red-500/40 text-[9px] font-mono uppercase font-bold">
+                {{ authUser.role || 'SUPER_ADMIN' }}
+              </span>
+              <ChevronDown class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200" :class="{ 'rotate-180': isProfileMenuOpen }" />
+            </button>
+
+            <!-- Dropdown Menu (Z-50, Unclipped) -->
+            <div
+              v-if="isProfileMenuOpen"
+              class="absolute right-0 mt-2 w-72 rounded-2xl bg-[#14141a] border border-zinc-700/90 p-2 shadow-2xl shadow-black/95 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+            >
+              <div class="px-3.5 py-3 border-b border-zinc-800 mb-1.5 bg-zinc-900/60 rounded-xl">
+                <div class="text-xs font-bold text-white flex items-center justify-between">
+                  <span>{{ authUser.name || 'Administrator' }}</span>
+                  <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold uppercase">
+                    {{ authUser.role || 'SUPER_ADMIN' }}
+                  </span>
+                </div>
+                <div class="text-[11px] text-zinc-400 font-mono truncate mt-0.5">{{ authUser.email || 'admin@venenoautocare.com' }}</div>
+              </div>
+
+              <button
+                type="button"
+                @click="isProfileMenuOpen = false; isSecurityModalOpen = true; securityModalTab = 'my_password'"
+                class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800 transition-colors text-left cursor-pointer group"
+              >
+                <KeyRound class="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                <div>
+                  <div>Change My Password</div>
+                  <div class="text-[10px] text-zinc-500 font-normal">Update current admin credentials</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                @click="isProfileMenuOpen = false; isSecurityModalOpen = true; securityModalTab = 'staff_accounts'"
+                class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800 transition-colors text-left cursor-pointer group"
+              >
+                <UserCog class="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
+                <div>
+                  <div>Staff Accounts & Passwords</div>
+                  <div class="text-[10px] text-zinc-500 font-normal">Reset passwords for team members</div>
+                </div>
+              </button>
+
+              <div class="border-t border-zinc-800 my-1.5"></div>
+
+              <button
+                type="button"
+                @click="isProfileMenuOpen = false; handleLogout()"
+                class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-red-400 hover:text-red-200 hover:bg-red-950/60 border border-transparent hover:border-red-800/50 transition-colors text-left cursor-pointer group"
+              >
+                <LogOut class="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
+                <span>Log Out of Dashboard</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Top Command Header (ADIHEX 2026) -->
       <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-zinc-950 via-[#121216] to-zinc-950 border border-zinc-800/90 p-6 sm:p-8 shadow-2xl">
         <div class="absolute -right-20 -top-20 w-80 h-80 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -417,7 +562,7 @@ const handleLogout = () => {
             </div>
           </div>
 
-          <!-- Quick Actions & Admin Profile Dropdown -->
+          <!-- Quick Actions -->
           <div class="flex flex-wrap items-center gap-2.5">
             <a
               :href="route('dashboard.adihex.export')"
@@ -441,85 +586,11 @@ const handleLogout = () => {
             <a
               href="/adihex"
               target="_blank"
-              class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-600 hover:brightness-110 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-950/60 transition-transform active:scale-95"
+              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-600 hover:brightness-110 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-950/60 transition-transform active:scale-95"
             >
               <span>Booth App</span>
               <ExternalLink class="w-3.5 h-3.5" />
             </a>
-
-            <!-- Admin Profile Chip & Menu -->
-            <div class="relative">
-              <button
-                type="button"
-                @click="isProfileMenuOpen = !isProfileMenuOpen"
-                class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-zinc-900/95 hover:bg-zinc-800 border border-amber-500/50 hover:border-amber-400 text-zinc-100 transition-all shadow-md group cursor-pointer"
-                title="Admin Profile & Security"
-              >
-                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500/30 to-red-600/30 border border-amber-500/60 flex items-center justify-center text-amber-300 font-bold text-xs uppercase shadow-inner">
-                  {{ authUser.name ? authUser.name.charAt(0) : 'A' }}
-                </div>
-                <div class="text-left hidden md:block">
-                  <div class="text-xs font-bold text-white flex items-center gap-1.5 leading-tight">
-                    <span>{{ authUser.name || 'Admin' }}</span>
-                    <span class="px-1.5 py-0.2 rounded bg-red-600/25 text-red-300 border border-red-500/40 text-[9px] font-mono uppercase font-bold">
-                      {{ authUser.role || 'SUPER_ADMIN' }}
-                    </span>
-                  </div>
-                </div>
-                <ChevronDown class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200" :class="{ 'rotate-180': isProfileMenuOpen }" />
-              </button>
-
-              <!-- Profile Dropdown Menu -->
-              <div
-                v-if="isProfileMenuOpen"
-                class="absolute right-0 mt-2 w-72 rounded-2xl bg-[#101014]/98 backdrop-blur-2xl border border-zinc-700/80 p-2 shadow-2xl shadow-black/95 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
-              >
-                <div class="px-3.5 py-3 border-b border-zinc-800/90 mb-1.5 bg-zinc-900/50 rounded-xl">
-                  <div class="text-xs font-bold text-white flex items-center justify-between">
-                    <span>{{ authUser.name || 'Administrator' }}</span>
-                    <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold uppercase">
-                      {{ authUser.role || 'SUPER_ADMIN' }}
-                    </span>
-                  </div>
-                  <div class="text-[11px] text-zinc-400 font-mono truncate mt-0.5">{{ authUser.email || 'admin@venenoautocare.com' }}</div>
-                </div>
-
-                <button
-                  type="button"
-                  @click="isProfileMenuOpen = false; isSecurityModalOpen = true; securityModalTab = 'my_password'"
-                  class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800/90 transition-colors text-left cursor-pointer group"
-                >
-                  <KeyRound class="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
-                  <div>
-                    <div>Change My Password</div>
-                    <div class="text-[10px] text-zinc-500 font-normal">Update current admin login key</div>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  @click="isProfileMenuOpen = false; isSecurityModalOpen = true; securityModalTab = 'staff_accounts'"
-                  class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800/90 transition-colors text-left cursor-pointer group"
-                >
-                  <UserCog class="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
-                  <div>
-                    <div>Staff Accounts & Passwords</div>
-                    <div class="text-[10px] text-zinc-500 font-normal">Reset passwords for team members</div>
-                  </div>
-                </button>
-
-                <div class="border-t border-zinc-800/80 my-1.5"></div>
-
-                <button
-                  type="button"
-                  @click="isProfileMenuOpen = false; handleLogout()"
-                  class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-red-400 hover:text-red-200 hover:bg-red-950/50 border border-transparent hover:border-red-800/50 transition-colors text-left cursor-pointer group"
-                >
-                  <LogOut class="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
-                  <span>Log Out of Dashboard</span>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
