@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerPortalController;
 use App\Http\Controllers\TechnicianPortalController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdihexController;
+use App\Http\Controllers\HammerChallengeController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,12 @@ Route::get('/{locale}/adihex/terms', [AdihexController::class, 'terms'])
 Route::get('/{locale}/adihex/display', [AdihexController::class, 'display'])
     ->where('locale', 'en|ar');
 
+// Hammer Challenge 2026 local event flow
+Route::get('/hammer-challenge', [HammerChallengeController::class, 'index'])->name('hammer-challenge.index');
+Route::get('/hammer-challenge/register', [HammerChallengeController::class, 'index'])->name('hammer-challenge.register');
+Route::get('/hammer-challenge/terms', [HammerChallengeController::class, 'terms'])->name('hammer-challenge.terms');
+Route::get('/hammer-challenge/confirmation', [HammerChallengeController::class, 'confirmation'])->name('hammer-challenge.confirmation');
+
 // Multilingual URL prefix fallbacks (en | ar)
 Route::get('/{locale}', [StorefrontController::class, 'home'])
     ->where('locale', 'en|ar');
@@ -40,6 +47,8 @@ Route::post('/api/adihex/spin', [AdihexController::class, 'spin'])->name('api.ad
 Route::post('/api/adihex/reserve', [AdihexController::class, 'reserve'])->name('api.adihex.reserve');
 Route::post('/api/adihex/payment-intent', [AdihexController::class, 'createPaymentIntent'])->name('api.adihex.payment-intent');
 Route::post('/api/adihex/redeem', [AdihexController::class, 'redeemVoucher'])->name('api.adihex.redeem');
+Route::post('/api/hammer-challenge/register', [HammerChallengeController::class, 'register'])->name('api.hammer-challenge.register');
+Route::get('/api/hammer-challenge/confirmation/{token}', [HammerChallengeController::class, 'confirmationData'])->name('api.hammer-challenge.confirmation');
 
 // Booking Engine
 Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
@@ -71,6 +80,10 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/inquiries/{inquiry}', [DashboardController::class, 'destroyInquiry'])->name('dashboard.inquiries.destroy');
         Route::post('/campaigns', [DashboardController::class, 'storeCampaign'])->name('dashboard.campaigns.store');
         Route::get('/adihex/export', [AdihexController::class, 'exportLeads'])->name('dashboard.adihex.export');
+        Route::patch('/hammer-challenge/{registration}/status', [DashboardController::class, 'updateHammerRegistrationStatus'])->name('dashboard.hammer-challenge.status');
+        Route::get('/hammer-challenge/export', [DashboardController::class, 'exportHammerRegistrations'])->name('dashboard.hammer-challenge.export');
+        Route::post('/change-password', [DashboardController::class, 'changePassword'])->name('dashboard.password.change');
+        Route::post('/users/{user}/reset-password', [DashboardController::class, 'resetUserPassword'])->name('dashboard.users.reset-password');
     });
 });
 

@@ -3,10 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdihexLead;
+use App\Models\HammerChallengeRegistration;
 use App\Models\Inquiry;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DashboardController extends Controller
 {
@@ -17,6 +22,18 @@ class DashboardController extends Controller
     {
         $adihexLeads = AdihexLead::latest()->get();
         $inquiries = Inquiry::latest()->get();
+        $hammerRegistrations = HammerChallengeRegistration::latest()->get();
+        $users = User::with('roles')->latest()->get()->map(function ($u) {
+            return [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'phone' => $u->phone,
+                'role' => $u->roles->pluck('name')->first() ?? 'customer',
+                'loyalty_tier' => $u->loyalty_tier,
+                'created_at' => $u->created_at?->format('Y-m-d H:i'),
+            ];
+        });
 
         // ADIHEX 2026 Campaign KPIs
         $adihexTotalSpins = $adihexLeads->count();
@@ -40,6 +57,8 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard/Index', [
             'adihexLeads' => $adihexLeads,
             'inquiries' => $inquiries,
+            'hammerRegistrations' => $hammerRegistrations,
+            'users' => $users,
             'adihexStats' => [
                 'totalSpins' => $adihexTotalSpins,
                 'paidReservations' => $adihexPaidReservations,
@@ -84,5 +103,90 @@ class DashboardController extends Controller
         $inquiry->delete();
 
         return back()->with('success', 'Inquiry deleted successfully.');
+    }
+
+    public function updateHammerRegistrationStatus(Request $request, HammerChallengeRegistration $registration)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:registered,checked_in,participated,disqualified,finished',
+        ]);
+
+        $registration->update($validated);
+
+        return back()->with('success', 'Hammer Challenge status updated.');
+    }
+
+    /**
+     * Change logged-in user password.
+     */
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return back()->with('success', 'Your password was updated successfully.');
+    }
+
+    /**
+     * Reset specific staff member's password.
+     */
+    public function resetUserPassword(Request $request, User $user)
+    {
+        $request->validate([
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return back()->with('success', "Password for {$user->name} ({$user->email}) was successfully reset.");
+    }
+
+    public function exportHammerRegistrations(): StreamedResponse
+    {
+        $fileName = 'veneno_hammer_challenge_' . now()->format('Y_m_d_His') . '.csv';
+        $registrations = HammerChallengeRegistration::latest()->get();
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename={$fileName}",
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ];
+
+        return response()->stream(function () use ($registrations) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, [
+                'Registration Number', 'Full Name', 'Date of Birth', 'Age', 'Mobile', 'Email',
+                'Emergency Contact Name', 'Emergency Contact Number', 'Registration Date & Time',
+                'Health Declaration', 'Terms Accepted', 'Media Consent', 'Status',
+            ]);
+
+            foreach ($registrations as $registration) {
+                fputcsv($file, [
+                    $registration->registration_number,
+                    $registration->full_name,
+                    $registration->getRawOriginal('date_of_birth'),
+                    $registration->age,
+                    $registration->mobile,
+                    $registration->email,
+                    $registration->emergency_contact_name,
+                    $registration->emergency_contact_number,
+                    $registration->created_at?->format('Y-m-d H:i:s'),
+                    $registration->health_declaration ? 'Yes' : 'No',
+                    $registration->terms_accepted ? 'Yes' : 'No',
+                    $registration->media_consent ? 'Yes' : 'No',
+                    $registration->status,
+                ]);
+            }
+
+            fclose($file);
+        }, 200, $headers);
     }
 }

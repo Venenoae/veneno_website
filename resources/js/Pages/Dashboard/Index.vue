@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Head, router, Link } from '@inertiajs/vue3';
+import { Head, router, Link, usePage } from '@inertiajs/vue3';
 import Navbar from '@/Components/Navbar.vue';
 import Footer from '@/Components/Footer.vue';
 import {
@@ -17,6 +17,7 @@ import {
   Car,
   Printer,
   ChevronRight,
+  ChevronDown,
   Filter,
   Search,
   Clock,
@@ -28,8 +29,18 @@ import {
   Tv,
   Gift,
   Crown,
+  Trophy,
   Check,
-  RefreshCw
+  RefreshCw,
+  KeyRound,
+  LogOut,
+  UserCog,
+  Lock,
+  Eye,
+  EyeOff,
+  User,
+  ShieldAlert,
+  UserCheck
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -37,9 +48,11 @@ const props = defineProps({
   adihexStats: { type: Object, default: () => ({}) },
   inquiries: { type: Array, default: () => [] },
   inquiryStats: { type: Object, default: () => ({}) },
+  hammerRegistrations: { type: Array, default: () => [] },
+  users: { type: Array, default: () => [] },
 });
 
-const currentTab = ref('adihex'); // 'adihex' | 'inquiries'
+const currentTab = ref('adihex'); // 'adihex' | 'hammer' | 'inquiries'
 
 // ==========================================
 // ADIHEX 2026 CRM Filters & Search
@@ -200,6 +213,174 @@ const handleDeleteInquiry = (inquiryId) => {
     });
   }
 };
+
+const hammerSearch = ref('');
+const hammerStatusFilter = ref('all');
+
+const filteredHammerRegistrations = computed(() => {
+  let list = props.hammerRegistrations || [];
+
+  if (hammerStatusFilter.value !== 'all') {
+    list = list.filter(registration => registration.status === hammerStatusFilter.value);
+  }
+
+  const query = hammerSearch.value.trim().toLowerCase();
+  if (query) {
+    list = list.filter(registration =>
+      [registration.registration_number, registration.full_name, registration.mobile, registration.email]
+        .some(value => value && value.toLowerCase().includes(query))
+    );
+  }
+
+  return list;
+});
+
+const updateHammerStatus = (registrationId, status) => {
+  router.patch(route('dashboard.hammer-challenge.status', registrationId), { status }, { preserveScroll: true });
+};
+
+// ==========================================
+// Admin Profile, Password & Logout Management
+// ==========================================
+const page = usePage();
+const authUser = computed(() => page.props.auth?.user || {});
+
+const isProfileMenuOpen = ref(false);
+const isSecurityModalOpen = ref(false);
+const securityModalTab = ref('my_password'); // 'my_password' | 'staff_accounts'
+
+// My Password State
+const myPassword = ref('');
+const myPasswordConfirm = ref('');
+const showMyPassword = ref(false);
+const myPasswordProcessing = ref(false);
+const myPasswordError = ref(null);
+const myPasswordSuccess = ref(null);
+
+const handleChangeMyPassword = () => {
+  myPasswordError.value = null;
+  myPasswordSuccess.value = null;
+
+  if (!myPassword.value) {
+    myPasswordError.value = 'Please enter a new password.';
+    return;
+  }
+  if (myPassword.value.length < 6) {
+    myPasswordError.value = 'Password must be at least 6 characters.';
+    return;
+  }
+  if (myPassword.value !== myPasswordConfirm.value) {
+    myPasswordError.value = 'Passwords do not match.';
+    return;
+  }
+
+  myPasswordProcessing.value = true;
+  router.post(
+    route('dashboard.password.change'),
+    {
+      password: myPassword.value,
+      password_confirmation: myPasswordConfirm.value,
+    },
+    {
+      preserveScroll: true,
+      onSuccess: () => {
+        myPassword.value = '';
+        myPasswordConfirm.value = '';
+        myPasswordSuccess.value = 'Your password has been changed successfully!';
+        myPasswordProcessing.value = false;
+      },
+      onError: (errors) => {
+        myPasswordError.value = errors.password || Object.values(errors)[0] || 'Failed to update password.';
+        myPasswordProcessing.value = false;
+      },
+      onFinish: () => {
+        myPasswordProcessing.value = false;
+      },
+    }
+  );
+};
+
+// Staff Password Reset State
+const staffSearch = ref('');
+const selectedStaffUser = ref(null);
+const staffNewPassword = ref('');
+const staffNewPasswordConfirm = ref('');
+const showStaffPassword = ref(false);
+const staffResetProcessing = ref(false);
+const staffResetError = ref(null);
+const staffResetSuccess = ref(null);
+
+const filteredStaffUsers = computed(() => {
+  let list = props.users || [];
+  if (staffSearch.value.trim()) {
+    const q = staffSearch.value.toLowerCase();
+    list = list.filter(
+      (u) =>
+        (u.name && u.name.toLowerCase().includes(q)) ||
+        (u.email && u.email.toLowerCase().includes(q)) ||
+        (u.role && u.role.toLowerCase().includes(q))
+    );
+  }
+  return list;
+});
+
+const openStaffPasswordReset = (user) => {
+  selectedStaffUser.value = user;
+  staffNewPassword.value = '';
+  staffNewPasswordConfirm.value = '';
+  staffResetError.value = null;
+  staffResetSuccess.value = null;
+};
+
+const handleResetStaffPassword = () => {
+  if (!selectedStaffUser.value) return;
+  staffResetError.value = null;
+  staffResetSuccess.value = null;
+
+  if (!staffNewPassword.value) {
+    staffResetError.value = 'Please enter a new password for this staff account.';
+    return;
+  }
+  if (staffNewPassword.value.length < 6) {
+    staffResetError.value = 'Password must be at least 6 characters.';
+    return;
+  }
+  if (staffNewPassword.value !== staffNewPasswordConfirm.value) {
+    staffResetError.value = 'Passwords do not match.';
+    return;
+  }
+
+  staffResetProcessing.value = true;
+  router.post(
+    route('dashboard.users.reset-password', selectedStaffUser.value.id),
+    {
+      password: staffNewPassword.value,
+      password_confirmation: staffNewPasswordConfirm.value,
+    },
+    {
+      preserveScroll: true,
+      onSuccess: () => {
+        staffResetSuccess.value = `Password for ${selectedStaffUser.value.name} (${selectedStaffUser.value.email}) has been successfully updated!`;
+        staffNewPassword.value = '';
+        staffNewPasswordConfirm.value = '';
+        staffResetProcessing.value = false;
+      },
+      onError: (errors) => {
+        staffResetError.value = errors.password || Object.values(errors)[0] || 'Failed to reset password.';
+        staffResetProcessing.value = false;
+      },
+      onFinish: () => {
+        staffResetProcessing.value = false;
+      },
+    }
+  );
+};
+
+const handleLogout = () => {
+  if (confirm('Are you sure you want to log out of the Admin Dashboard?')) {
+    router.post(route('logout'));
+  }
+};
 </script>
 
 <template>
@@ -236,7 +417,7 @@ const handleDeleteInquiry = (inquiryId) => {
             </div>
           </div>
 
-          <!-- Quick Actions -->
+          <!-- Quick Actions & Admin Profile Dropdown -->
           <div class="flex flex-wrap items-center gap-2.5">
             <a
               :href="route('dashboard.adihex.export')"
@@ -244,7 +425,7 @@ const handleDeleteInquiry = (inquiryId) => {
               title="Export all ADIHEX leads as CSV"
             >
               <Printer class="w-3.5 h-3.5 text-amber-400" />
-              <span>Export CSV</span>
+              <span class="hidden sm:inline">Export CSV</span>
             </a>
 
             <a
@@ -254,17 +435,91 @@ const handleDeleteInquiry = (inquiryId) => {
               title="Open 22-Inch Portrait Kiosk Display"
             >
               <Tv class="w-3.5 h-3.5 text-red-400" />
-              <span>22" Kiosk Display</span>
+              <span class="hidden sm:inline">22" Display</span>
             </a>
 
             <a
               href="/adihex"
               target="_blank"
-              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-600 hover:brightness-110 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-950/60 transition-transform active:scale-95"
+              class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-600 hover:brightness-110 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-950/60 transition-transform active:scale-95"
             >
-              <span>Open Booth App</span>
+              <span>Booth App</span>
               <ExternalLink class="w-3.5 h-3.5" />
             </a>
+
+            <!-- Admin Profile Chip & Menu -->
+            <div class="relative">
+              <button
+                type="button"
+                @click="isProfileMenuOpen = !isProfileMenuOpen"
+                class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-zinc-900/95 hover:bg-zinc-800 border border-amber-500/50 hover:border-amber-400 text-zinc-100 transition-all shadow-md group cursor-pointer"
+                title="Admin Profile & Security"
+              >
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500/30 to-red-600/30 border border-amber-500/60 flex items-center justify-center text-amber-300 font-bold text-xs uppercase shadow-inner">
+                  {{ authUser.name ? authUser.name.charAt(0) : 'A' }}
+                </div>
+                <div class="text-left hidden md:block">
+                  <div class="text-xs font-bold text-white flex items-center gap-1.5 leading-tight">
+                    <span>{{ authUser.name || 'Admin' }}</span>
+                    <span class="px-1.5 py-0.2 rounded bg-red-600/25 text-red-300 border border-red-500/40 text-[9px] font-mono uppercase font-bold">
+                      {{ authUser.role || 'SUPER_ADMIN' }}
+                    </span>
+                  </div>
+                </div>
+                <ChevronDown class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200" :class="{ 'rotate-180': isProfileMenuOpen }" />
+              </button>
+
+              <!-- Profile Dropdown Menu -->
+              <div
+                v-if="isProfileMenuOpen"
+                class="absolute right-0 mt-2 w-72 rounded-2xl bg-[#101014]/98 backdrop-blur-2xl border border-zinc-700/80 p-2 shadow-2xl shadow-black/95 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+              >
+                <div class="px-3.5 py-3 border-b border-zinc-800/90 mb-1.5 bg-zinc-900/50 rounded-xl">
+                  <div class="text-xs font-bold text-white flex items-center justify-between">
+                    <span>{{ authUser.name || 'Administrator' }}</span>
+                    <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold uppercase">
+                      {{ authUser.role || 'SUPER_ADMIN' }}
+                    </span>
+                  </div>
+                  <div class="text-[11px] text-zinc-400 font-mono truncate mt-0.5">{{ authUser.email || 'admin@venenoautocare.com' }}</div>
+                </div>
+
+                <button
+                  type="button"
+                  @click="isProfileMenuOpen = false; isSecurityModalOpen = true; securityModalTab = 'my_password'"
+                  class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800/90 transition-colors text-left cursor-pointer group"
+                >
+                  <KeyRound class="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <div>Change My Password</div>
+                    <div class="text-[10px] text-zinc-500 font-normal">Update current admin login key</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  @click="isProfileMenuOpen = false; isSecurityModalOpen = true; securityModalTab = 'staff_accounts'"
+                  class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800/90 transition-colors text-left cursor-pointer group"
+                >
+                  <UserCog class="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
+                  <div>
+                    <div>Staff Accounts & Passwords</div>
+                    <div class="text-[10px] text-zinc-500 font-normal">Reset passwords for team members</div>
+                  </div>
+                </button>
+
+                <div class="border-t border-zinc-800/80 my-1.5"></div>
+
+                <button
+                  type="button"
+                  @click="isProfileMenuOpen = false; handleLogout()"
+                  class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-red-400 hover:text-red-200 hover:bg-red-950/50 border border-transparent hover:border-red-800/50 transition-colors text-left cursor-pointer group"
+                >
+                  <LogOut class="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
+                  <span>Log Out of Dashboard</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -392,6 +647,15 @@ const handleDeleteInquiry = (inquiryId) => {
         >
           <MessageSquare class="w-3.5 h-3.5" />
           <span>Website Quote Inquiries ({{ inquiries?.length || 0 }})</span>
+        </button>
+
+        <button
+          @click="currentTab = 'hammer'"
+          class="py-3 px-5 border-b-2 font-bold transition-all flex items-center gap-2 cursor-pointer"
+          :class="currentTab === 'hammer' ? 'text-red-400 border-red-400 bg-red-500/5 rounded-t-xl' : 'text-zinc-400 border-transparent hover:text-zinc-200'"
+        >
+          <Trophy class="w-3.5 h-3.5" />
+          <span>Hammer Challenge ({{ hammerRegistrations?.length || 0 }})</span>
         </button>
       </div>
 
@@ -595,6 +859,21 @@ const handleDeleteInquiry = (inquiryId) => {
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: HAMMER CHALLENGE PARTICIPANTS -->
+      <div v-if="currentTab === 'hammer'" class="space-y-6 animate-in fade-in duration-200">
+        <div class="rounded-3xl border border-zinc-800/90 bg-zinc-950/70 p-6 shadow-2xl space-y-6">
+          <div class="flex flex-col gap-4 border-b border-zinc-800/80 pb-6 md:flex-row md:items-center md:justify-between">
+            <div><h3 class="text-lg font-bold uppercase text-white font-display">Hammer Challenge Participants</h3><p class="mt-1 text-xs text-zinc-400">Registered participants for 12 September 2026.</p></div>
+            <a :href="route('dashboard.hammer-challenge.export')" class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold uppercase text-white hover:bg-emerald-500"><Printer class="w-3.5 h-3.5" /> Export to Excel</a>
+          </div>
+          <div class="flex flex-col gap-3 md:flex-row">
+            <div class="relative flex-1"><Search class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" /><input v-model="hammerSearch" type="search" placeholder="Search name, registration number, mobile, email..." class="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-4 text-xs text-white placeholder-zinc-500 focus:border-red-500 focus:outline-none" /></div>
+            <select v-model="hammerStatusFilter" class="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-xs text-zinc-300 focus:border-red-500 focus:outline-none"><option value="all">All Statuses</option><option value="registered">Registered</option><option value="checked_in">Checked-in</option><option value="participated">Participated</option><option value="disqualified">Disqualified</option><option value="finished">Finished</option></select>
+          </div>
+          <div class="overflow-x-auto rounded-2xl border border-zinc-800"><table class="w-full text-left text-xs font-mono"><thead class="bg-zinc-900 text-[10px] uppercase text-zinc-400"><tr><th class="p-3">Participant</th><th class="p-3">Contact</th><th class="p-3">Emergency Contact</th><th class="p-3">Registered</th><th class="p-3">Status</th></tr></thead><tbody class="divide-y divide-zinc-800/80"><tr v-for="registration in filteredHammerRegistrations" :key="registration.id" class="hover:bg-zinc-900/50"><td class="p-3"><div class="font-bold text-white">{{ registration.full_name }}</div><div class="mt-1 text-red-400">{{ registration.registration_number }}</div><div class="mt-1 text-zinc-500">DOB {{ registration.date_of_birth }} ({{ registration.age }})</div></td><td class="p-3"><div class="text-zinc-200">{{ registration.mobile }}</div><div class="mt-1 text-zinc-500">{{ registration.email }}</div></td><td class="p-3"><div class="text-zinc-200">{{ registration.emergency_contact_name }}</div><div class="mt-1 text-zinc-500">{{ registration.emergency_contact_number }}</div></td><td class="p-3 text-zinc-400">{{ new Date(registration.created_at).toLocaleString('en-GB') }}</td><td class="p-3"><select :value="registration.status" @change="updateHammerStatus(registration.id, $event.target.value)" class="rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-2 text-[11px] text-zinc-200"><option value="registered">Registered</option><option value="checked_in">Checked-in</option><option value="participated">Participated</option><option value="disqualified">Disqualified</option><option value="finished">Finished</option></select></td></tr><tr v-if="filteredHammerRegistrations.length === 0"><td colspan="5" class="p-10 text-center text-zinc-500">No Hammer Challenge registrations found.</td></tr></tbody></table></div>
         </div>
       </div>
 
@@ -880,6 +1159,305 @@ const handleDeleteInquiry = (inquiryId) => {
           >
             Cancel
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- Admin Security & Password Management Modal -->
+    <!-- ========================================== -->
+    <div
+      v-if="isSecurityModalOpen"
+      class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+    >
+      <div class="w-full max-w-2xl rounded-3xl border border-zinc-700/90 bg-[#0d0d12] p-6 sm:p-7 shadow-2xl shadow-black/95 space-y-5 max-h-[90vh] overflow-y-auto">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500/20 to-red-600/20 text-amber-400 flex items-center justify-center border border-amber-500/40 shrink-0">
+              <KeyRound class="w-5 h-5" />
+            </div>
+            <div>
+              <h3 class="text-base font-black text-white tracking-tight">Security & Password Control</h3>
+              <p class="text-xs text-zinc-400 font-mono">Manage Admin credentials & staff account access</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            @click="isSecurityModalOpen = false; selectedStaffUser = null"
+            class="w-8 h-8 rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+
+        <!-- Tab Selector -->
+        <div class="flex items-center gap-2 p-1.5 rounded-2xl bg-zinc-950 border border-zinc-800">
+          <button
+            type="button"
+            @click="securityModalTab = 'my_password'"
+            class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+            :class="securityModalTab === 'my_password' ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300 border border-amber-500/40 shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'"
+          >
+            <KeyRound class="w-3.5 h-3.5" />
+            <span>My Password</span>
+          </button>
+
+          <button
+            type="button"
+            @click="securityModalTab = 'staff_accounts'"
+            class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+            :class="securityModalTab === 'staff_accounts' ? 'bg-gradient-to-r from-blue-500/20 to-blue-600/20 text-blue-300 border border-blue-500/40 shadow-sm' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'"
+          >
+            <UserCog class="w-3.5 h-3.5" />
+            <span>Staff Accounts ({{ users.length }})</span>
+          </button>
+        </div>
+
+        <!-- ============================== -->
+        <!-- TAB 1: Change My Password      -->
+        <!-- ============================== -->
+        <div v-if="securityModalTab === 'my_password'" class="space-y-4 pt-1">
+          <!-- Current Account Context Box -->
+          <div class="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-300 font-bold text-xs uppercase">
+                {{ authUser.name ? authUser.name.charAt(0) : 'A' }}
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white">{{ authUser.name || 'Current Admin' }}</div>
+                <div class="text-[11px] text-zinc-400 font-mono">{{ authUser.email }}</div>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-red-600/20 text-red-300 border border-red-500/30 text-[10px] font-mono uppercase font-bold">
+              {{ authUser.role || 'SUPER_ADMIN' }}
+            </span>
+          </div>
+
+          <!-- Alert feedback -->
+          <div v-if="myPasswordSuccess" class="p-3.5 rounded-2xl bg-emerald-950/80 border border-emerald-600/60 text-emerald-300 text-xs flex items-center gap-2">
+            <CheckCircle2 class="w-4 h-4 shrink-0 text-emerald-400" />
+            <span>{{ myPasswordSuccess }}</span>
+          </div>
+
+          <div v-if="myPasswordError" class="p-3.5 rounded-2xl bg-red-950/80 border border-red-600/60 text-red-300 text-xs flex items-center gap-2">
+            <AlertCircle class="w-4 h-4 shrink-0 text-red-400" />
+            <span>{{ myPasswordError }}</span>
+          </div>
+
+          <!-- Password Inputs -->
+          <form @submit.prevent="handleChangeMyPassword" class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-mono text-zinc-300 flex items-center justify-between">
+                <span>New Password</span>
+                <span class="text-[10px] text-zinc-500">Min. 6 characters</span>
+              </label>
+              <div class="relative">
+                <input
+                  :type="showMyPassword ? 'text' : 'password'"
+                  v-model="myPassword"
+                  placeholder="Enter new strong password"
+                  class="w-full pl-10 pr-10 py-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-mono focus:outline-none focus:border-amber-500 transition-colors"
+                  required
+                />
+                <Lock class="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
+                <button
+                  type="button"
+                  @click="showMyPassword = !showMyPassword"
+                  class="absolute right-3.5 top-3.5 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                >
+                  <EyeOff v-if="showMyPassword" class="w-4 h-4" />
+                  <Eye v-else class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-xs font-mono text-zinc-300">Confirm New Password</label>
+              <div class="relative">
+                <input
+                  :type="showMyPassword ? 'text' : 'password'"
+                  v-model="myPasswordConfirm"
+                  placeholder="Re-type new password"
+                  class="w-full pl-10 pr-10 py-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-mono focus:outline-none focus:border-amber-500 transition-colors"
+                  required
+                />
+                <Lock class="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
+              </div>
+            </div>
+
+            <!-- Password Requirements Hint -->
+            <div class="flex items-center gap-4 text-[11px] font-mono text-zinc-500 pt-1">
+              <div class="flex items-center gap-1.5" :class="myPassword.length >= 6 ? 'text-emerald-400 font-bold' : ''">
+                <Check class="w-3.5 h-3.5" />
+                <span>At least 6 characters</span>
+              </div>
+              <div class="flex items-center gap-1.5" :class="myPassword && myPassword === myPasswordConfirm ? 'text-emerald-400 font-bold' : ''">
+                <Check class="w-3.5 h-3.5" />
+                <span>Passwords match</span>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              :disabled="myPasswordProcessing || !myPassword || myPassword !== myPasswordConfirm"
+              class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-red-600 to-amber-600 hover:brightness-110 disabled:opacity-50 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-red-950/60 transition-all cursor-pointer active:scale-98"
+            >
+              <RefreshCw v-if="myPasswordProcessing" class="w-4 h-4 animate-spin" />
+              <KeyRound v-else class="w-4 h-4" />
+              <span>{{ myPasswordProcessing ? 'Updating Password...' : 'Save New Password' }}</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- =================================== -->
+        <!-- TAB 2: Staff Accounts & Resets      -->
+        <!-- =================================== -->
+        <div v-if="securityModalTab === 'staff_accounts'" class="space-y-4 pt-1">
+          <!-- Search Bar -->
+          <div class="relative">
+            <input
+              type="text"
+              v-model="staffSearch"
+              placeholder="Search staff by name, email, or role..."
+              class="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-mono focus:outline-none focus:border-blue-500 transition-colors"
+            />
+            <Search class="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+          </div>
+
+          <!-- Active Staff Reset Sub-Form (If user selected) -->
+          <div v-if="selectedStaffUser" class="p-4 rounded-2xl bg-blue-950/30 border border-blue-500/40 space-y-3.5 animate-in fade-in duration-150">
+            <div class="flex items-center justify-between border-b border-blue-500/20 pb-2.5">
+              <div>
+                <span class="text-[10px] font-mono text-blue-400 uppercase font-bold block">Resetting Password For</span>
+                <span class="text-xs font-black text-white">{{ selectedStaffUser.name }}</span>
+                <span class="text-[11px] text-zinc-400 font-mono ml-2">({{ selectedStaffUser.email }})</span>
+              </div>
+              <button
+                type="button"
+                @click="selectedStaffUser = null"
+                class="text-xs text-zinc-400 hover:text-white font-mono cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <div v-if="staffResetSuccess" class="p-3 rounded-xl bg-emerald-950/80 border border-emerald-600/60 text-emerald-300 text-xs flex items-center gap-2">
+              <CheckCircle2 class="w-4 h-4 shrink-0 text-emerald-400" />
+              <span>{{ staffResetSuccess }}</span>
+            </div>
+
+            <div v-if="staffResetError" class="p-3 rounded-xl bg-red-950/80 border border-red-600/60 text-red-300 text-xs flex items-center gap-2">
+              <AlertCircle class="w-4 h-4 shrink-0 text-red-400" />
+              <span>{{ staffResetError }}</span>
+            </div>
+
+            <form @submit.prevent="handleResetStaffPassword" class="space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="text-[11px] font-mono text-zinc-300">New Password</label>
+                  <div class="relative">
+                    <input
+                      :type="showStaffPassword ? 'text' : 'password'"
+                      v-model="staffNewPassword"
+                      placeholder="Min. 6 chars"
+                      class="w-full pl-9 pr-9 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-mono focus:outline-none focus:border-blue-500"
+                      required
+                    />
+                    <Lock class="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-2.5" />
+                    <button
+                      type="button"
+                      @click="showStaffPassword = !showStaffPassword"
+                      class="absolute right-3 top-2.5 text-zinc-500 hover:text-zinc-300"
+                    >
+                      <EyeOff v-if="showStaffPassword" class="w-3.5 h-3.5" />
+                      <Eye v-else class="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div class="space-y-1">
+                  <label class="text-[11px] font-mono text-zinc-300">Confirm Password</label>
+                  <div class="relative">
+                    <input
+                      :type="showStaffPassword ? 'text' : 'password'"
+                      v-model="staffNewPasswordConfirm"
+                      placeholder="Re-type password"
+                      class="w-full pl-9 pr-3 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-mono focus:outline-none focus:border-blue-500"
+                      required
+                    />
+                    <Lock class="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-2.5" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 pt-1">
+                <button
+                  type="submit"
+                  :disabled="staffResetProcessing || !staffNewPassword || staffNewPassword !== staffNewPasswordConfirm"
+                  class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  <RefreshCw v-if="staffResetProcessing" class="w-3.5 h-3.5 animate-spin" />
+                  <KeyRound v-else class="w-3.5 h-3.5" />
+                  <span>{{ staffResetProcessing ? 'Resetting...' : 'Confirm Password Reset' }}</span>
+                </button>
+                <button
+                  type="button"
+                  @click="selectedStaffUser = null"
+                  class="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white font-mono text-xs transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Staff Accounts List -->
+          <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
+            <div
+              v-for="user in filteredStaffUsers"
+              :key="user.id"
+              class="p-3.5 rounded-2xl bg-zinc-900/70 hover:bg-zinc-900 border border-zinc-800/80 flex items-center justify-between gap-3 transition-colors"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold text-xs uppercase shrink-0">
+                  {{ user.name ? user.name.charAt(0) : 'U' }}
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-white truncate">{{ user.name }}</div>
+                  <div class="text-[11px] text-zinc-400 font-mono truncate">{{ user.email }}</div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <span
+                  class="px-2 py-0.5 rounded-md text-[10px] font-mono uppercase font-bold"
+                  :class="[
+                    user.role === 'super_admin' ? 'bg-red-950/80 text-red-300 border border-red-800/50' :
+                    user.role === 'manager' ? 'bg-amber-950/80 text-amber-300 border border-amber-800/50' :
+                    user.role === 'technician' ? 'bg-blue-950/80 text-blue-300 border border-blue-800/50' :
+                    'bg-zinc-800 text-zinc-300 border border-zinc-700'
+                  ]"
+                >
+                  {{ user.role }}
+                </span>
+
+                <button
+                  type="button"
+                  @click="openStaffPasswordReset(user)"
+                  class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-blue-600 text-zinc-300 hover:text-white border border-zinc-700 text-xs font-mono font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Reset password for this user"
+                >
+                  <KeyRound class="w-3 h-3" />
+                  <span>Reset</span>
+                </button>
+              </div>
+            </div>
+
+            <div v-if="filteredStaffUsers.length === 0" class="p-6 text-center text-xs font-mono text-zinc-500">
+              No staff or user accounts found matching your search.
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -80,6 +80,7 @@ const countdown = ref({
   minutes: '00',
   seconds: '00',
 });
+const hammerCountdown = ref({ days: '00', hours: '00', minutes: '00', seconds: '00' });
 let countdownTimer = null;
 
 const calculateCountdown = () => {
@@ -93,6 +94,15 @@ const calculateCountdown = () => {
     hours: pad(Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))),
     minutes: pad(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))),
     seconds: pad(Math.floor((diff % (1000 * 60)) / 1000)),
+  };
+
+  const hammerTarget = new Date('2026-09-12T19:00:00+04:00').getTime();
+  const hammerDiff = Math.max(0, hammerTarget - Date.now());
+  hammerCountdown.value = {
+    days: pad(Math.floor(hammerDiff / (1000 * 60 * 60 * 24))),
+    hours: pad(Math.floor((hammerDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))),
+    minutes: pad(Math.floor((hammerDiff % (1000 * 60 * 60)) / (1000 * 60))),
+    seconds: pad(Math.floor((hammerDiff % (1000 * 60)) / 1000)),
   };
 };
 
@@ -216,6 +226,216 @@ onUnmounted(() => {
       </div>
     </section>
 
+    <!-- HAMMER CHALLENGE FEATURED EVENT CAMPAIGN -->
+    <section class="relative overflow-hidden border-b border-zinc-800/80 bg-gradient-to-b from-[#070709] via-[#0d0d12] to-[#070709] py-10 sm:py-16">
+      <div class="pointer-events-none absolute left-1/2 top-0 h-[350px] w-[900px] -translate-x-1/2 bg-gradient-to-b from-red-600/15 via-amber-500/10 to-transparent blur-3xl"></div>
+      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:24px_24px] opacity-20"></div>
+      <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="relative overflow-hidden rounded-3xl border-2 border-amber-500/30 bg-gradient-to-b from-zinc-900/90 via-zinc-950/95 to-black p-5 shadow-2xl shadow-black/90 sm:p-8 lg:p-10">
+          <div class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent"></div>
+          <div class="grid items-center gap-8 lg:grid-cols-12 lg:gap-10">
+            <div class="space-y-5 text-center lg:col-span-7 lg:text-left">
+              <div class="flex flex-wrap items-center justify-center gap-2.5 lg:justify-start"><span class="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/15 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-300"><Flame class="h-3.5 w-3.5 text-amber-400" /> {{ t('hammer.eventSeries') }}</span><span class="inline-flex items-center gap-1.5 rounded-full border border-zinc-700/80 bg-zinc-900 px-3 py-1.5 text-xs font-mono text-zinc-300"><MapPin class="h-3.5 w-3.5 text-red-500" /> {{ t('hammer.venue') }}</span></div>
+              <div><h2 class="font-display text-3xl font-bold uppercase leading-tight tracking-tight text-white sm:text-5xl">{{ t('hammer.title') }}<br /><span class="bg-gradient-to-r from-amber-400 via-amber-200 to-red-500 bg-clip-text text-transparent">{{ t('hammer.final') }}</span></h2><p class="mt-3 text-xs font-mono uppercase tracking-wider text-zinc-400">{{ t('hammer.date') }}</p></div>
+              <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3"><div class="rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-3 text-left"><p class="text-[10px] font-mono uppercase text-zinc-500">{{ t('hammer.checkIn') }}</p><p class="mt-1 text-sm font-bold text-white">7:30 PM</p></div><div class="rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-3 text-left"><p class="text-[10px] font-mono uppercase text-zinc-500">{{ t('hammer.starts') }}</p><p class="mt-1 text-sm font-bold text-white">8:00 PM</p></div><div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-left"><p class="text-[10px] font-mono uppercase text-amber-300">{{ t('hammer.firstPrize') }}</p><p class="mt-1 text-sm font-black text-white">AED 15,000</p></div></div>
+              <div class="rounded-2xl border border-amber-500/30 bg-zinc-950/90 p-4 text-center shadow-xl"><div class="flex items-center justify-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-amber-400"><Clock class="h-3.5 w-3.5" /> {{ t('hammer.countdown') }}</div><div class="mt-3 grid grid-cols-4 gap-2"><div v-for="unit in [{ key: 'days', label: t('hammer.days') }, { key: 'hours', label: t('hammer.hours') }, { key: 'minutes', label: t('hammer.minutes') }, { key: 'seconds', label: t('hammer.seconds') }]" :key="unit.key" class="rounded-xl border border-zinc-800 bg-zinc-900 p-2.5"><div class="font-mono text-lg font-bold text-amber-300">{{ hammerCountdown[unit.key] }}</div><div class="text-[9px] font-mono uppercase text-zinc-500">{{ unit.label }}</div></div></div></div>
+              <div class="flex flex-wrap items-center justify-center gap-3 lg:justify-start"><Link href="/hammer-challenge/register" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-600 px-5 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-red-950/50 transition hover:brightness-110 sm:w-auto">{{ t('hammer.register') }} <ArrowUpRight class="h-4 w-4" /></Link><Link href="/hammer-challenge/terms" class="text-xs font-semibold text-zinc-400 underline underline-offset-4 hover:text-amber-300">{{ t('hammer.terms') }}</Link></div>
+            </div>
+            <div class="flex flex-col gap-4 lg:col-span-5"><div class="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-4 text-center shadow-xl"><div class="flex items-center justify-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-amber-400"><Trophy class="h-3.5 w-3.5" /> {{ t('hammer.prizePodium') }}</div><div class="mt-4 border-b border-amber-500/20 pb-4"><p class="text-[10px] font-mono uppercase text-amber-300">{{ t('hammer.firstCash') }}</p><p class="mt-1 text-4xl font-black text-white">AED 15,000</p></div></div><div class="relative min-h-[260px] overflow-hidden rounded-2xl border border-amber-500/35 bg-zinc-950/80 p-3 shadow-xl sm:min-h-[320px]"><div class="absolute inset-3 border border-amber-500/15"></div><picture class="relative flex h-full min-h-[235px] items-center justify-center sm:min-h-[295px]"><source media="(max-width: 639px)" srcset="/images/hammer/Hammer3.jpeg" /><img src="/images/hammer/Hammer1.jpeg" alt="Veneno Hammer Challenge campaign artwork" class="h-full max-h-[330px] w-full object-cover drop-shadow-[0_18px_35px_rgba(239,68,68,0.14)]" /></picture><div class="pointer-events-none absolute bottom-5 left-5 text-[9px] font-mono uppercase tracking-[0.2em] text-amber-300/80"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ABOUT US & VISION / MISSION SECTION -->
+    <section id="about" class="py-12 sm:py-24 bg-zinc-950/90 relative border-t border-zinc-900 overflow-hidden">
+      <!-- Ambient Glow Orb in Background -->
+      <div class="absolute -top-32 -left-32 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none animate-glow-pulse"></div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
+          
+          <!-- Main Branch Photo -->
+          <div class="lg:col-span-6">
+            <div class="rounded-3xl overflow-hidden glass-panel border border-zinc-800 w-full h-48 sm:h-[480px] relative group shadow-2xl shadow-black/60">
+              <img
+                src="/images/main-branch.webp"
+                alt="Veneno Auto Care Center — Main Branch Abu Dhabi"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <!-- Subtle overlay badge -->
+              <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl glass-panel border border-zinc-700/80 text-[11px] sm:text-xs font-mono text-zinc-300 shadow-xl backdrop-blur-md">
+                  <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                  <span class="text-red-400 font-bold uppercase tracking-wider">Abu Dhabi</span>
+                  <span class="text-zinc-600">|</span>
+                  <span class="line-clamp-1">Veneno Auto Care — Main Branch</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Story, Heritage & Vision/Mission Content -->
+          <div class="lg:col-span-6 space-y-4 sm:space-y-6">
+            <div>
+              <span class="text-xs font-mono uppercase tracking-widest text-red-500 font-bold">{{ t('about.tag') }}</span>
+              <h2 class="text-2xl sm:text-4xl font-display font-semibold uppercase tracking-wider text-white mt-1">
+                {{ t('about.title') }}
+              </h2>
+            </div>
+
+            <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed font-light">
+              {{ t('about.p1') }}
+            </p>
+
+            <p class="hidden sm:block text-sm text-zinc-400 leading-relaxed">
+              {{ t('about.p2') }}
+            </p>
+
+            <!-- Vision & Mission Cards -->
+            <div class="grid grid-cols-2 gap-2.5 sm:gap-4 pt-1 sm:pt-2">
+              <div class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-1.5 sm:space-y-2">
+                <div class="flex items-center gap-1.5 sm:gap-2 text-red-500">
+                  <Compass class="w-4 h-4 sm:w-5 sm:h-5" />
+                  <h4 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white">{{ t('about.visionTitle') }}</h4>
+                </div>
+                <p class="text-[10px] sm:text-xs text-zinc-400 leading-relaxed line-clamp-2 sm:line-clamp-none">{{ t('about.visionText') }}</p>
+              </div>
+
+              <div class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-1.5 sm:space-y-2">
+                <div class="flex items-center gap-1.5 sm:gap-2 text-red-500">
+                  <Target class="w-4 h-4 sm:w-5 sm:h-5" />
+                  <h4 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white">{{ t('about.missionTitle') }}</h4>
+                </div>
+                <p class="text-[10px] sm:text-xs text-zinc-400 leading-relaxed line-clamp-2 sm:line-clamp-none">{{ t('about.missionText') }}</p>
+              </div>
+            </div>
+
+            <div class="pt-2 sm:pt-4 flex flex-wrap items-center gap-3 sm:gap-4">
+              <button
+                @click="isQuoteModalOpen = true"
+                class="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-display font-semibold text-xs uppercase tracking-wider shadow-lg shadow-red-600/30 transition-all"
+              >
+                {{ t('about.inquireBtn') }}
+              </button>
+
+              <a
+                href="https://wa.me/97126344403?text=Hello%20Veneno%20Auto%20Care,%20I%20would%20like%20to%20inquire%20about%20your%20services."
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 hover:border-emerald-500/50 text-zinc-200 hover:text-white text-xs font-bold transition-all shadow-md"
+              >
+                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#25D366] fill-current" viewBox="0 0 24 24">
+                  <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.34C9.36 7.34 9.09 7.4 8.87 7.65C8.65 7.89 8.02 8.48 8.02 9.7C8.02 10.92 8.91 12.09 9.03 12.25C9.16 12.42 10.74 14.97 13.25 15.96C15.34 16.79 15.76 16.62 16.22 16.58C16.67 16.54 17.69 15.98 17.9 15.38C18.11 14.78 18.11 14.27 18.05 14.16C17.99 14.05 17.82 13.99 17.57 13.86C17.32 13.74 16.08 13.13 15.85 13.04C15.62 12.96 15.46 12.92 15.29 13.16C15.12 13.41 14.64 13.99 14.5 14.16C14.35 14.32 14.21 14.34 13.96 14.22C13.71 14.09 12.91 13.83 11.96 12.98C11.22 12.32 10.72 11.51 10.58 11.26C10.43 11.01 10.56 10.88 10.69 10.75C10.8 10.64 10.94 10.46 11.06 10.31C11.19 10.17 11.23 10.06 11.31 9.9C11.39 9.73 11.35 9.59 11.29 9.46C11.23 9.34 10.72 8.08 10.51 7.58C10.31 7.09 10.1 7.16 9.94 7.15C9.79 7.14 9.66 7.34 9.53 7.34Z"/>
+                </svg>
+                <span>{{ t('hero.whatsappBtn') }}</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+      <!-- DYNAMIC CONTINUOUS ANIMATED LUXURY MARQUEE TICKER -->
+    <section class="relative py-4 sm:py-5 bg-zinc-950/95 border-y border-zinc-900 overflow-hidden select-none">
+      <!-- Ambient Edge Glow Gradients -->
+      <div class="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-zinc-950 to-transparent z-10"></div>
+      <div class="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-zinc-950 to-transparent z-10"></div>
+
+      <!-- Lane 1: Credentials, Certified Badges & Global Standards (Moving Left) -->
+      <div class="animate-marquee flex items-center gap-4 py-1">
+        <div v-for="i in 2" :key="'lane1-' + i" class="flex items-center gap-4 shrink-0">
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-red-500/40 text-white font-mono text-xs font-bold uppercase tracking-wider">
+            <ShieldCheck class="w-3.5 h-3.5 text-red-500 shrink-0" />
+            <span>{{ t('ticker.item1') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs font-bold uppercase tracking-wider">
+            <Gem class="w-3.5 h-3.5 text-zinc-300 shrink-0" />
+            <span>{{ t('ticker.item2') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs uppercase tracking-wider">
+            <MapPin class="w-3.5 h-3.5 text-red-500 shrink-0" />
+            <span>{{ t('ticker.item3') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-950/40 border border-red-500/40 text-red-300 font-mono text-xs font-bold uppercase tracking-wider">
+            <Award class="w-3.5 h-3.5 text-red-400 shrink-0" />
+            <span>{{ t('ticker.item4') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs uppercase tracking-wider">
+            <Sparkles class="w-3.5 h-3.5 text-red-500 shrink-0" />
+            <span>{{ t('ticker.item5') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs font-bold uppercase tracking-wider">
+            <BadgeCheck class="w-3.5 h-3.5 text-zinc-300 shrink-0" />
+            <span>{{ t('ticker.item6') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs uppercase tracking-wider">
+            <Zap class="w-3.5 h-3.5 text-red-500 shrink-0" />
+            <span>{{ t('ticker.item7') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs uppercase tracking-wider">
+            <ShieldCheck class="w-3.5 h-3.5 text-white shrink-0" />
+            <span>{{ t('ticker.item8') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs uppercase tracking-wider">
+            <Users class="w-3.5 h-3.5 text-red-400 shrink-0" />
+            <span>{{ t('ticker.item9') }}</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Lane 2: 9 Core Treatments & Precision Services (Moving Right) -->
+      <div class="animate-marquee-reverse flex items-center gap-3 pt-2">
+        <div v-for="j in 2" :key="'lane2-' + j" class="flex items-center gap-3 shrink-0">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+            <span>{{ t('ticker.strip1') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>
+            <span>{{ t('ticker.strip2') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+            <span>{{ t('ticker.strip3') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
+            <span>{{ t('ticker.strip4') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+            <span>{{ t('ticker.strip5') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>
+            <span>{{ t('ticker.strip6') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+            <span>{{ t('ticker.strip7') }}</span>
+          </span>
+
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
+            <span>{{ t('ticker.strip8') }}</span>
+          </span>
+        </div>
+      </div>
+    </section>
     <!-- =========================================================================
          2. ADIHEX 2026 OFFICIAL EXHIBITION SPOTLIGHT SECTION
          ========================================================================= -->
@@ -409,198 +629,6 @@ onUnmounted(() => {
 
       </div>
     </section>
-
-    <!-- DYNAMIC CONTINUOUS ANIMATED LUXURY MARQUEE TICKER -->
-    <section class="relative py-4 sm:py-5 bg-zinc-950/95 border-y border-zinc-900 overflow-hidden select-none">
-      <!-- Ambient Edge Glow Gradients -->
-      <div class="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-zinc-950 to-transparent z-10"></div>
-      <div class="pointer-events-none absolute inset-y-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-zinc-950 to-transparent z-10"></div>
-
-      <!-- Lane 1: Credentials, Certified Badges & Global Standards (Moving Left) -->
-      <div class="animate-marquee flex items-center gap-4 py-1">
-        <div v-for="i in 2" :key="'lane1-' + i" class="flex items-center gap-4 shrink-0">
-          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-red-500/40 text-white font-mono text-xs font-bold uppercase tracking-wider">
-            <ShieldCheck class="w-3.5 h-3.5 text-red-500 shrink-0" />
-            <span>{{ t('ticker.item1') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs font-bold uppercase tracking-wider">
-            <Gem class="w-3.5 h-3.5 text-zinc-300 shrink-0" />
-            <span>{{ t('ticker.item2') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs uppercase tracking-wider">
-            <MapPin class="w-3.5 h-3.5 text-red-500 shrink-0" />
-            <span>{{ t('ticker.item3') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-950/40 border border-red-500/40 text-red-300 font-mono text-xs font-bold uppercase tracking-wider">
-            <Award class="w-3.5 h-3.5 text-red-400 shrink-0" />
-            <span>{{ t('ticker.item4') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs uppercase tracking-wider">
-            <Sparkles class="w-3.5 h-3.5 text-red-500 shrink-0" />
-            <span>{{ t('ticker.item5') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs font-bold uppercase tracking-wider">
-            <BadgeCheck class="w-3.5 h-3.5 text-zinc-300 shrink-0" />
-            <span>{{ t('ticker.item6') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs uppercase tracking-wider">
-            <Zap class="w-3.5 h-3.5 text-red-500 shrink-0" />
-            <span>{{ t('ticker.item7') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs uppercase tracking-wider">
-            <ShieldCheck class="w-3.5 h-3.5 text-white shrink-0" />
-            <span>{{ t('ticker.item8') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-zinc-200 font-mono text-xs uppercase tracking-wider">
-            <Users class="w-3.5 h-3.5 text-red-400 shrink-0" />
-            <span>{{ t('ticker.item9') }}</span>
-          </span>
-        </div>
-      </div>
-
-      <!-- Lane 2: 9 Core Treatments & Precision Services (Moving Right) -->
-      <div class="animate-marquee-reverse flex items-center gap-3 pt-2">
-        <div v-for="j in 2" :key="'lane2-' + j" class="flex items-center gap-3 shrink-0">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
-            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-            <span>{{ t('ticker.strip1') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
-            <span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>
-            <span>{{ t('ticker.strip2') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
-            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-            <span>{{ t('ticker.strip3') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
-            <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
-            <span>{{ t('ticker.strip4') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
-            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-            <span>{{ t('ticker.strip5') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
-            <span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>
-            <span>{{ t('ticker.strip6') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
-            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-            <span>{{ t('ticker.strip7') }}</span>
-          </span>
-
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
-            <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>
-            <span>{{ t('ticker.strip8') }}</span>
-          </span>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. ABOUT US & VISION / MISSION SECTION -->
-    <section id="about" class="py-12 sm:py-24 bg-zinc-950/90 relative border-t border-zinc-900 overflow-hidden">
-      <!-- Ambient Glow Orb in Background -->
-      <div class="absolute -top-32 -left-32 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none animate-glow-pulse"></div>
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
-          
-          <!-- Main Branch Photo -->
-          <div class="lg:col-span-6">
-            <div class="rounded-3xl overflow-hidden glass-panel border border-zinc-800 w-full h-48 sm:h-[480px] relative group shadow-2xl shadow-black/60">
-              <img
-                src="/images/main-branch.webp"
-                alt="Veneno Auto Care Center — Main Branch Abu Dhabi"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              />
-              <!-- Subtle overlay badge -->
-              <div class="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4">
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl glass-panel border border-zinc-700/80 text-[11px] sm:text-xs font-mono text-zinc-300 shadow-xl backdrop-blur-md">
-                  <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                  <span class="text-red-400 font-bold uppercase tracking-wider">Abu Dhabi</span>
-                  <span class="text-zinc-600">|</span>
-                  <span class="line-clamp-1">Veneno Auto Care — Main Branch</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Story, Heritage & Vision/Mission Content -->
-          <div class="lg:col-span-6 space-y-4 sm:space-y-6">
-            <div>
-              <span class="text-xs font-mono uppercase tracking-widest text-red-500 font-bold">{{ t('about.tag') }}</span>
-              <h2 class="text-2xl sm:text-4xl font-display font-semibold uppercase tracking-wider text-white mt-1">
-                {{ t('about.title') }}
-              </h2>
-            </div>
-
-            <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed font-light">
-              {{ t('about.p1') }}
-            </p>
-
-            <p class="hidden sm:block text-sm text-zinc-400 leading-relaxed">
-              {{ t('about.p2') }}
-            </p>
-
-            <!-- Vision & Mission Cards -->
-            <div class="grid grid-cols-2 gap-2.5 sm:gap-4 pt-1 sm:pt-2">
-              <div class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-1.5 sm:space-y-2">
-                <div class="flex items-center gap-1.5 sm:gap-2 text-red-500">
-                  <Compass class="w-4 h-4 sm:w-5 sm:h-5" />
-                  <h4 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white">{{ t('about.visionTitle') }}</h4>
-                </div>
-                <p class="text-[10px] sm:text-xs text-zinc-400 leading-relaxed line-clamp-2 sm:line-clamp-none">{{ t('about.visionText') }}</p>
-              </div>
-
-              <div class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-1.5 sm:space-y-2">
-                <div class="flex items-center gap-1.5 sm:gap-2 text-red-500">
-                  <Target class="w-4 h-4 sm:w-5 sm:h-5" />
-                  <h4 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-white">{{ t('about.missionTitle') }}</h4>
-                </div>
-                <p class="text-[10px] sm:text-xs text-zinc-400 leading-relaxed line-clamp-2 sm:line-clamp-none">{{ t('about.missionText') }}</p>
-              </div>
-            </div>
-
-            <div class="pt-2 sm:pt-4 flex flex-wrap items-center gap-3 sm:gap-4">
-              <button
-                @click="isQuoteModalOpen = true"
-                class="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-display font-semibold text-xs uppercase tracking-wider shadow-lg shadow-red-600/30 transition-all"
-              >
-                {{ t('about.inquireBtn') }}
-              </button>
-
-              <a
-                href="https://wa.me/97126344403?text=Hello%20Veneno%20Auto%20Care,%20I%20would%20like%20to%20inquire%20about%20your%20services."
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 hover:border-emerald-500/50 text-zinc-200 hover:text-white text-xs font-bold transition-all shadow-md"
-              >
-                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#25D366] fill-current" viewBox="0 0 24 24">
-                  <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.34C9.36 7.34 9.09 7.4 8.87 7.65C8.65 7.89 8.02 8.48 8.02 9.7C8.02 10.92 8.91 12.09 9.03 12.25C9.16 12.42 10.74 14.97 13.25 15.96C15.34 16.79 15.76 16.62 16.22 16.58C16.67 16.54 17.69 15.98 17.9 15.38C18.11 14.78 18.11 14.27 18.05 14.16C17.99 14.05 17.82 13.99 17.57 13.86C17.32 13.74 16.08 13.13 15.85 13.04C15.62 12.96 15.46 12.92 15.29 13.16C15.12 13.41 14.64 13.99 14.5 14.16C14.35 14.32 14.21 14.34 13.96 14.22C13.71 14.09 12.91 13.83 11.96 12.98C11.22 12.32 10.72 11.51 10.58 11.26C10.43 11.01 10.56 10.88 10.69 10.75C10.8 10.64 10.94 10.46 11.06 10.31C11.19 10.17 11.23 10.06 11.31 9.9C11.39 9.73 11.35 9.59 11.29 9.46C11.23 9.34 10.72 8.08 10.51 7.58C10.31 7.09 10.1 7.16 9.94 7.15C9.79 7.14 9.66 7.34 9.53 7.34Z"/>
-                </svg>
-                <span>{{ t('hero.whatsappBtn') }}</span>
-              </a>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
     <!-- 3. WHY CHOOSE VENENO: 7 PILLARS (Swipeable on Mobile) -->
     <section id="why-us" class="py-12 sm:py-24 bg-zinc-950/80 relative border-t border-zinc-900 overflow-hidden">
       <!-- Background Watermark Typography for Depth -->

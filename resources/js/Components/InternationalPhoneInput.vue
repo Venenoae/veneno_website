@@ -119,17 +119,17 @@ const parseIncomingValue = (val) => {
   }
 };
 
-watch(() => props.modelValue, (newVal) => {
-  if (newVal !== getFullNumber()) {
-    parseIncomingValue(newVal);
-  }
-}, { immediate: true });
-
 const getFullNumber = () => {
   const digits = localNumber.value.trim();
   if (!digits) return '';
   return `${selectedCountry.value.dial} ${digits}`;
 };
+
+watch(() => props.modelValue, (newVal) => {
+  if (newVal !== getFullNumber()) {
+    parseIncomingValue(newVal);
+  }
+}, { immediate: true });
 
 const emitUpdate = () => {
   const full = getFullNumber();
