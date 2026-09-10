@@ -37,17 +37,17 @@ class HammerChallengeController extends Controller
             'email' => ['required', 'email:rfc', 'max:255'],
             'emergency_contact_name' => ['required', 'string', 'min:2', 'max:120'],
             'emergency_contact_number' => ['required', 'string', 'regex:/^\\+?[0-9\\s().-]{7,20}$/', 'max:30'],
-            'age_declaration' => ['accepted'],
-            'health_declaration' => ['accepted'],
-            'challenge_declaration' => ['accepted'],
-            'voluntary_participation' => ['accepted'],
             'terms_accepted' => ['accepted'],
-            'media_consent' => ['accepted'],
         ]);
 
         $validated['email'] = strtolower(trim($validated['email']));
         $validated['mobile'] = $this->normalizePhone($validated['mobile']);
         $validated['emergency_contact_number'] = trim($validated['emergency_contact_number']);
+        $validated['age_declaration'] = true;
+        $validated['health_declaration'] = true;
+        $validated['challenge_declaration'] = true;
+        $validated['voluntary_participation'] = true;
+        $validated['media_consent'] = true;
 
         $dateOfBirth = Carbon::createFromFormat('Y-m-d', $validated['date_of_birth'])->startOfDay();
         $age = $dateOfBirth->age;

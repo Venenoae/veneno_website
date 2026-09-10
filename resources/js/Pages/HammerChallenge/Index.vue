@@ -12,12 +12,7 @@ const form = reactive({
   email: '',
   emergency_contact_name: '',
   emergency_contact_number: '',
-  age_declaration: false,
-  health_declaration: false,
-  challenge_declaration: false,
-  voluntary_participation: false,
   terms_accepted: false,
-  media_consent: false,
 });
 
 const { t } = useI18n();
@@ -62,31 +57,20 @@ const age = computed(() => {
   return years;
 });
 
-const declarations = computed(() => [
-  { key: 'age_declaration', text: t('hammer.registration.ageDeclaration') },
-  { key: 'health_declaration', text: t('hammer.registration.healthDeclaration') },
-  { key: 'challenge_declaration', text: t('hammer.registration.challengeDeclaration'), terms: true },
-  { key: 'voluntary_participation', text: t('hammer.registration.voluntaryDeclaration') },
-  { key: 'terms_accepted', text: t('hammer.registration.termsDeclaration'), terms: true },
-  { key: 'media_consent', text: t('hammer.registration.mediaDeclaration') },
-]);
-
 const fieldError = (field) => errors.value[field]?.[0] || '';
 
 const validate = () => {
   const nextErrors = {};
   const requiredFields = ['full_name', 'date_of_birth', 'mobile', 'email', 'emergency_contact_name', 'emergency_contact_number'];
   requiredFields.forEach((field) => {
-    if (!String(form[field]).trim()) nextErrors[field] = [t('hammer.registration.required')];
+    if (!String(form[field] || '').trim()) nextErrors[field] = [t('hammer.registration.required')];
   });
 
   if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) nextErrors.email = [t('hammer.registration.validEmail')];
   if (form.mobile && !/^\+?[0-9\s().-]{7,20}$/.test(form.mobile)) nextErrors.mobile = [t('hammer.registration.validMobile')];
   if (form.emergency_contact_number && !/^\+?[0-9\s().-]{7,20}$/.test(form.emergency_contact_number)) nextErrors.emergency_contact_number = [t('hammer.registration.validEmergency')];
   if (age.value !== null && age.value < 18) nextErrors.date_of_birth = [t('hammer.registration.minimumAge')];
-  declarations.forEach(({ key }) => {
-    if (!form[key]) nextErrors[key] = [t('hammer.registration.requiredDeclaration')];
-  });
+  if (!form.terms_accepted) nextErrors.terms_accepted = [t('hammer.registration.requiredDeclaration')];
 
   errors.value = nextErrors;
   return Object.keys(nextErrors).length === 0;
@@ -298,14 +282,45 @@ const submit = async () => {
             </div>
           </section>
 
-          <section class="rounded-3xl border border-zinc-800/90 bg-zinc-950/70 p-5 shadow-xl sm:p-8">
-            <div class="border-b border-zinc-800 pb-5"><p class="text-xs font-mono uppercase tracking-widest text-red-400">{{ t('hammer.registration.declarations') }}</p><h2 class="mt-2 font-display text-2xl font-bold uppercase text-white">{{ t('hammer.registration.agreement') }}</h2></div>
-            <div class="mt-6 space-y-3">
-              <label v-for="declaration in declarations" :key="declaration.key" class="flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4 transition hover:border-red-500/50">
-                <input v-model="form[declaration.key]" type="checkbox" class="mt-1 h-5 w-5 shrink-0 accent-red-600" />
-                <span class="text-sm leading-relaxed text-zinc-300">{{ declaration.text }} <Link v-if="declaration.terms" href="/hammer-challenge/terms" class="ml-1 text-red-400 underline underline-offset-2">{{ t('hammer.registration.viewTerms') }}</Link><span class="field-error">{{ fieldError(declaration.key) }}</span></span>
-              </label>
+          <section class="rounded-3xl border border-zinc-800/90 bg-zinc-950/70 p-5 shadow-xl sm:p-8 space-y-5">
+            <div class="border-b border-zinc-800 pb-4">
+              <p class="text-xs font-mono uppercase tracking-widest text-red-400">{{ t('hammer.registration.declarations') }}</p>
+              <h2 class="mt-1 font-display text-2xl font-bold uppercase text-white">{{ t('hammer.registration.agreement') }}</h2>
             </div>
+
+            <!-- Bulleted Terms Summary -->
+            <div class="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 sm:p-5 space-y-3.5 text-xs sm:text-sm text-zinc-300 font-sans leading-relaxed">
+              <div class="flex items-start gap-3">
+                <span class="w-2 h-2 rounded-full bg-red-500 mt-2 shrink-0"></span>
+                <p><strong class="text-white">{{ t('hammer.registration.ageReqTitle') }}</strong> {{ t('hammer.registration.ageDeclaration') }}</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <span class="w-2 h-2 rounded-full bg-amber-400 mt-2 shrink-0"></span>
+                <p><strong class="text-white">{{ t('hammer.registration.healthReqTitle') }}</strong> {{ t('hammer.registration.healthDeclaration') }}</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <span class="w-2 h-2 rounded-full bg-red-500 mt-2 shrink-0"></span>
+                <p><strong class="text-white">{{ t('hammer.registration.safetyReqTitle') }}</strong> {{ t('hammer.registration.challengeDeclaration') }}</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <span class="w-2 h-2 rounded-full bg-amber-400 mt-2 shrink-0"></span>
+                <p><strong class="text-white">{{ t('hammer.registration.mediaReqTitle') }}</strong> {{ t('hammer.registration.mediaDeclaration') }}</p>
+              </div>
+            </div>
+
+            <!-- Single Acceptance Checkbox -->
+            <label class="flex cursor-pointer items-start gap-3.5 rounded-2xl border border-amber-500/40 bg-zinc-900/80 p-4 sm:p-5 transition hover:border-amber-400 shadow-md">
+              <input v-model="form.terms_accepted" type="checkbox" class="mt-1 h-5 w-5 shrink-0 accent-red-600 rounded cursor-pointer" />
+              <div class="text-xs sm:text-sm leading-relaxed text-zinc-200">
+                <span class="font-bold text-white block">{{ t('hammer.registration.singleAcceptance') }}</span>
+                <div class="mt-1.5 text-xs">
+                  <Link href="/hammer-challenge/terms" target="_blank" class="text-amber-400 hover:text-amber-300 underline underline-offset-2">
+                    {{ t('hammer.registration.viewTerms') }}
+                  </Link>
+                </div>
+                <span v-if="fieldError('terms_accepted')" class="field-error block mt-1">{{ fieldError('terms_accepted') }}</span>
+              </div>
+            </label>
           </section>
 
           <div v-if="generalError" class="flex items-start gap-3 rounded-2xl border border-red-500/40 bg-red-950/30 p-4 text-sm text-red-200"><AlertCircle class="h-5 w-5 shrink-0 text-red-400" /><span>{{ generalError }}</span></div>

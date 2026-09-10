@@ -102,12 +102,17 @@
       "strengthDescription": "One challenge. One finish line. A defining test of strength at Veneno Auto Care Center.",
       "beforeEvent": "Before the event",
       "beforeEventText": "Bring valid ID and wear suitable sports clothing and athletic footwear.",
-      "ageDeclaration": "I confirm that I am 18 years of age or older.",
-      "healthDeclaration": "I confirm that I am physically and medically fit to participate in a challenge involving lifting and carrying heavy weights, and that I do not have any injury or medical condition that may put me at risk during participation.",
-      "challengeDeclaration": "I confirm that I have read, understood, and agree to the Terms & Conditions of the Veneno Hammer Challenge. I confirm that my physical and medical condition is suitable for participating in a challenge involving carrying a 150 kg weight. I understand the nature of the activity and the risks associated with it, and I agree to follow all safety instructions and instructions given by the organizers.",
-      "voluntaryDeclaration": "I acknowledge that my participation is voluntary. I understand that the challenge involves significant physical effort and risks associated with lifting heavy weights, and I agree to follow all safety instructions and instructions given by the organizers and judges.",
-      "termsDeclaration": "I agree to the Terms & Conditions of the competition.",
-      "mediaDeclaration": "I consent to being photographed and/or filmed during the event and to Veneno using event-related photos and videos on its website, social media platforms, and other Veneno communication channels."
+      "ageDeclaration": "Must be 18 years of age or older on event day.",
+      "healthDeclaration": "Must be physically and medically fit with no pre-existing conditions that risk injury during heavy weight exertion.",
+      "challengeDeclaration": "Must follow all safety protocols, marshal instructions, and official rules for carrying the 150 kg hammer weight.",
+      "voluntaryDeclaration": "Participation is completely voluntary with full acknowledgment and assumption of event risks.",
+      "termsDeclaration": "I agree to the official Terms & Conditions of the competition.",
+      "mediaDeclaration": "Consent to event photography and videography for promotional and media coverage across Veneno official channels.",
+      "singleAcceptance": "I have read, understood, and accept all the participant terms, rules, and conditions above.",
+      "ageReqTitle": "Age Requirement (18+):",
+      "healthReqTitle": "Health & Physical Fitness:",
+      "safetyReqTitle": "150 kg Challenge & Safety:",
+      "mediaReqTitle": "Media & Photography Release:"
     }
   },
   "ticker": {
