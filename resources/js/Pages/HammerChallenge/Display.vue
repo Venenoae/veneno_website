@@ -64,7 +64,7 @@ const generateLuxuryQR = async () => {
 
     const emblemImg = new Image();
     emblemImg.crossOrigin = 'anonymous';
-    emblemImg.src = '/images/adihex/veneno-qr-emblem.png';
+    emblemImg.src = '/images/veneno-emblem.png';
 
     await new Promise((resolve) => {
       emblemImg.onload = () => {
@@ -109,7 +109,7 @@ const generateLuxuryQR = async () => {
   }
 };
 
-// 60 FPS Particle Canvas Engine (Champagne Gold & Crimson Embers)
+// 60 FPS Particle Canvas Engine (Veneno Red & Electric Lime Green Embers)
 const initParticleCanvas = () => {
   const canvas = bgCanvasRef.value;
   if (!canvas) return;
@@ -132,7 +132,7 @@ const initParticleCanvas = () => {
       x: Math.random() * width,
       y: Math.random() * height,
       radius: Math.random() * 2.5 + 1.0,
-      color: Math.random() > 0.4 ? '#c5a059' : '#ef4444',
+      color: Math.random() > 0.5 ? '#ef4444' : (Math.random() > 0.5 ? '#a3e635' : '#ffffff'),
       alpha: Math.random() * 0.7 + 0.2,
       speedX: (Math.random() - 0.5) * 0.6,
       speedY: -Math.random() * 1.2 - 0.3,
@@ -202,27 +202,27 @@ onUnmounted(() => {
     <!-- Deep Ambient Glow Auras -->
     <div class="pointer-events-none absolute inset-0 z-0">
       <div class="absolute -top-[25%] left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-gradient-to-b from-red-600/25 via-red-900/15 to-transparent blur-3xl"></div>
-      <div class="absolute -bottom-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-t from-amber-500/20 via-amber-700/10 to-transparent blur-3xl"></div>
+      <div class="absolute -bottom-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-t from-lime-500/15 via-red-950/20 to-transparent blur-3xl"></div>
     </div>
 
     <!-- Top Header / Official Banner -->
     <header class="relative z-10 flex flex-col items-center text-center space-y-3 pt-2 sm:pt-4">
       <!-- Veneno Brand Signature Badge -->
-      <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-zinc-900/80 border border-amber-500/40 shadow-xl shadow-black/80 backdrop-blur-md">
+      <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-zinc-900/80 border border-red-500/40 shadow-xl shadow-black/80 backdrop-blur-md">
         <div class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></div>
-        <span class="text-xs sm:text-sm font-bold tracking-[0.25em] uppercase text-amber-300 font-mono">
+        <span class="text-xs sm:text-sm font-bold tracking-[0.25em] uppercase text-white font-mono">
           VENENO AUTO CARE CENTER • ABU DHABI
         </span>
       </div>
 
       <!-- Main Exhibition Title -->
       <div class="space-y-1">
-        <div class="flex items-center justify-center gap-2 text-red-500 font-black tracking-widest text-sm uppercase">
+        <div class="flex items-center justify-center gap-2 text-lime-400 font-black tracking-widest text-sm uppercase">
           <Flame class="w-5 h-5 text-red-500 animate-pulse" />
           <span>LIVE EVENT • AUDIENCE & VISITOR PASS</span>
           <Flame class="w-5 h-5 text-red-500 animate-pulse" />
         </div>
-        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-amber-300 drop-shadow-2xl font-display">
+        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-white to-lime-400 drop-shadow-2xl font-display">
           HAMMER CHALLENGE
         </h1>
         <p class="text-xl sm:text-3xl font-bold text-zinc-200 tracking-wide">
@@ -236,13 +236,13 @@ onUnmounted(() => {
       <!-- QR Card Container -->
       <div class="relative group">
         <!-- Ambient Glowing Borders -->
-        <div class="absolute -inset-1.5 bg-gradient-to-r from-red-600 via-amber-500 to-red-600 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition duration-1000 animate-pulse"></div>
+        <div class="absolute -inset-1.5 bg-gradient-to-r from-red-600 via-lime-400 to-red-600 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition duration-1000 animate-pulse"></div>
 
         <!-- Inner Frame -->
-        <div class="relative rounded-3xl bg-zinc-950/95 border-2 border-amber-500/60 p-5 sm:p-7 shadow-2xl flex flex-col items-center">
+        <div class="relative rounded-3xl bg-zinc-950/95 border-2 border-red-500/60 p-5 sm:p-7 shadow-2xl flex flex-col items-center">
           <!-- Scan Prompt Top Pill -->
-          <div class="mb-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-red-950/70 border border-red-500/50 text-red-300 text-xs sm:text-sm font-bold uppercase tracking-wider shadow-inner">
-            <Camera class="w-4 h-4 text-amber-400" />
+          <div class="mb-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-red-950/70 border border-red-500/50 text-red-200 text-xs sm:text-sm font-bold uppercase tracking-wider shadow-inner">
+            <Camera class="w-4 h-4 text-lime-400" />
             <span>Open Camera to Scan • افتح الكاميرا للمسح</span>
           </div>
 
@@ -265,11 +265,11 @@ onUnmounted(() => {
           <!-- Pass Type Badge Below QR -->
           <div class="mt-4 text-center space-y-1">
             <div class="text-sm sm:text-base font-black tracking-wide text-white uppercase flex items-center justify-center gap-2">
-              <Sparkles class="w-4 h-4 text-amber-400" />
+              <Sparkles class="w-4 h-4 text-lime-400" />
               <span>FREE AUDIENCE & VISITOR TICKET</span>
-              <Sparkles class="w-4 h-4 text-amber-400" />
+              <Sparkles class="w-4 h-4 text-lime-400" />
             </div>
-            <div class="text-xs sm:text-sm text-amber-300/90 font-medium">
+            <div class="text-xs sm:text-sm text-lime-400/90 font-medium">
               احصل على تذكرة الحضور وتصريح الدخول المجاني فوراً
             </div>
           </div>
@@ -282,7 +282,7 @@ onUnmounted(() => {
       <!-- 3 Key Value Props -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div class="flex items-center gap-3 p-3 rounded-2xl bg-[#121216]/90 border border-zinc-800 backdrop-blur-md">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+          <div class="w-10 h-10 rounded-xl bg-lime-500/10 border border-lime-500/30 flex items-center justify-center text-lime-400 shrink-0">
             <Trophy class="w-5 h-5" />
           </div>
           <div>
