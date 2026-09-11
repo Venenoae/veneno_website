@@ -26,9 +26,15 @@ class HammerChallengeController extends Controller
         ]);
     }
 
-    public function audience(): Response
+    public function audience(Request $request, ?string $locale = null): Response
     {
-        return Inertia::render('HammerChallenge/Audience');
+        if ($locale && in_array($locale, ['en', 'ar'])) {
+            app()->setLocale($locale);
+        }
+
+        return Inertia::render('HammerChallenge/Audience', [
+            'initialLocale' => $locale ?: app()->getLocale(),
+        ]);
     }
 
     public function audienceConfirmation(): Response
@@ -141,11 +147,13 @@ class HammerChallengeController extends Controller
             'full_name' => ['required', 'string', 'min:2', 'max:120'],
             'mobile' => ['required', 'string', 'regex:/^\+?[0-9\s().-]{7,20}$/', 'max:30'],
             'email' => ['nullable', 'email:rfc', 'max:255'],
+            'google_review_name' => ['nullable', 'string', 'max:150'],
         ]);
 
         $validated['full_name'] = trim($validated['full_name']);
         $validated['mobile'] = $this->normalizePhone($validated['mobile']);
         $validated['email'] = !empty($validated['email']) ? strtolower(trim($validated['email'])) : null;
+        $validated['google_review_name'] = !empty($validated['google_review_name']) ? trim($validated['google_review_name']) : null;
 
         // Check if already registered
         $existing = HammerAudienceRegistration::query()
@@ -161,6 +169,7 @@ class HammerChallengeController extends Controller
                     'ticket_number' => $existing->ticket_number,
                     'confirmation_token' => $existing->confirmation_token,
                     'full_name' => $existing->full_name,
+                    'google_review_name' => $existing->google_review_name,
                     'status' => $existing->status,
                 ],
             ], 200);
@@ -173,6 +182,7 @@ class HammerChallengeController extends Controller
                 'full_name' => $validated['full_name'],
                 'mobile' => $validated['mobile'],
                 'email' => $validated['email'],
+                'google_review_name' => $validated['google_review_name'],
                 'status' => 'registered',
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
@@ -191,6 +201,7 @@ class HammerChallengeController extends Controller
                 'ticket_number' => $registration->ticket_number,
                 'confirmation_token' => $registration->confirmation_token,
                 'full_name' => $registration->full_name,
+                'google_review_name' => $registration->google_review_name,
                 'status' => $registration->status,
             ],
         ], 201);
@@ -212,6 +223,7 @@ class HammerChallengeController extends Controller
                 'full_name' => $registration->full_name,
                 'mobile' => $registration->mobile,
                 'email' => $registration->email,
+                'google_review_name' => $registration->google_review_name,
                 'status' => $registration->status,
                 'created_at' => $registration->created_at?->format('Y-m-d H:i'),
             ],

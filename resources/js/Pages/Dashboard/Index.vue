@@ -230,7 +230,7 @@ const filteredHammerAudiences = computed(() => {
   const query = hammerAudienceSearch.value.trim().toLowerCase();
   if (query) {
     list = list.filter(a =>
-      [a.ticket_number, a.full_name, a.mobile, a.email]
+      [a.ticket_number, a.full_name, a.mobile, a.email, a.google_review_name]
         .some(v => v && v.toLowerCase().includes(query))
     );
   }
@@ -1073,6 +1073,7 @@ const handleLogout = () => {
                     <th class="p-3">Ticket Pass #</th>
                     <th class="p-3">Visitor Name</th>
                     <th class="p-3">Contact</th>
+                    <th class="p-3">Google Reviewer</th>
                     <th class="p-3">Registered Date</th>
                     <th class="p-3">Status</th>
                   </tr>
@@ -1090,6 +1091,13 @@ const handleLogout = () => {
                       <div v-if="aud.email" class="mt-0.5 text-zinc-500 text-[11px]">{{ aud.email }}</div>
                       <div v-else class="text-zinc-600 text-[10px] italic">No email provided</div>
                     </td>
+                    <td class="p-3">
+                      <div v-if="aud.google_review_name" class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px] font-medium">
+                        <span class="text-amber-400">★</span>
+                        <span class="font-bold text-white">{{ aud.google_review_name }}</span>
+                      </div>
+                      <span v-else class="text-zinc-600 text-[10px] italic">No review name</span>
+                    </td>
                     <td class="p-3 text-zinc-400 text-[11px]">{{ new Date(aud.created_at).toLocaleString('en-GB') }}</td>
                     <td class="p-3">
                       <select
@@ -1105,7 +1113,7 @@ const handleLogout = () => {
                     </td>
                   </tr>
                   <tr v-if="filteredHammerAudiences.length === 0">
-                    <td colspan="5" class="p-10 text-center text-zinc-500">No Audience or Visitor passes registered yet.</td>
+                    <td colspan="6" class="p-10 text-center text-zinc-500">No Audience or Visitor passes registered yet.</td>
                   </tr>
                 </tbody>
               </table>

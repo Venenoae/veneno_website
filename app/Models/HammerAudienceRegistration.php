@@ -15,6 +15,7 @@ class HammerAudienceRegistration extends Model
         'full_name',
         'mobile',
         'email',
+        'google_review_name',
         'status',
         'ip_address',
         'user_agent',

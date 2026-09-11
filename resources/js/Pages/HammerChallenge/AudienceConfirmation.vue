@@ -114,6 +114,10 @@ const openGoogleMaps = () => {
               {{ registration.ticket_number }}
             </div>
             <div class="text-xs font-bold text-zinc-200 mt-1.5">{{ registration.full_name }}</div>
+            <div v-if="registration.google_review_name" class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono">
+              <span class="text-amber-400">★</span>
+              <span>Google Review: <strong class="text-white">{{ registration.google_review_name }}</strong></span>
+            </div>
           </div>
 
           <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider pt-2 border-t border-zinc-800">

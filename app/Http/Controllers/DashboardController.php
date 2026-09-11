@@ -177,7 +177,7 @@ class DashboardController extends Controller
         return response()->stream(function () use ($audiences) {
             $file = fopen('php://output', 'w');
             fputcsv($file, [
-                'Ticket Number', 'Full Name', 'Mobile', 'Email', 'Registration Date & Time', 'Status',
+                'Ticket Number', 'Full Name', 'Mobile', 'Email', 'Google Review Account', 'Registration Date & Time', 'Status',
             ]);
 
             foreach ($audiences as $audience) {
@@ -186,6 +186,7 @@ class DashboardController extends Controller
                     $audience->full_name,
                     $audience->mobile,
                     $audience->email ?? 'N/A',
+                    $audience->google_review_name ?? 'N/A',
                     $audience->created_at?->format('Y-m-d H:i:s'),
                     $audience->status,
                 ]);
