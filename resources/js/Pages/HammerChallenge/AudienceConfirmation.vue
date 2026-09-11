@@ -50,9 +50,13 @@ const openGoogleMaps = () => {
 
     <!-- Header -->
     <header class="relative z-10 w-full max-w-2xl mx-auto flex items-center justify-between pb-4">
-      <Link href="/" class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-red-600/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-xs">
-          V
+      <Link href="/" class="flex items-center gap-2.5 group">
+        <div class="w-8 h-8 rounded-lg overflow-hidden border border-amber-500/40 bg-red-600 flex items-center justify-center p-1 shadow-md group-hover:scale-105 transition">
+          <img 
+            src="/images/veneno-emblem.png" 
+            alt="Veneno Auto Care" 
+            class="w-full h-full object-contain rounded-md"
+          />
         </div>
         <span class="text-xs font-black tracking-widest text-white uppercase font-display">VENENO AUTO CARE</span>
       </Link>
