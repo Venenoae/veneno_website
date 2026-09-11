@@ -78,6 +78,9 @@ Route::post('/api/hammer-challenge/register', [HammerChallengeController::class,
 Route::get('/api/hammer-challenge/confirmation/{token}', [HammerChallengeController::class, 'confirmationData'])->name('api.hammer-challenge.confirmation');
 Route::post('/api/hammer-challenge/audience', [HammerChallengeController::class, 'registerAudience'])->name('api.hammer-challenge.audience');
 Route::get('/api/hammer-challenge/audience/confirmation/{token}', [HammerChallengeController::class, 'audienceConfirmationData'])->name('api.hammer-challenge.audience.confirmation');
+Route::get('/api/hammer-challenge/raffle/participants', [HammerChallengeController::class, 'getRaffleParticipants'])->name('api.hammer-challenge.raffle.participants');
+Route::post('/api/hammer-challenge/raffle/draw', [HammerChallengeController::class, 'drawRaffleWinner'])->name('api.hammer-challenge.raffle.draw');
+Route::post('/api/hammer-challenge/raffle/reset', [HammerChallengeController::class, 'resetRaffleWinners'])->name('api.hammer-challenge.raffle.reset');
 
 // Booking Engine
 Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
@@ -105,6 +108,7 @@ Route::middleware(['auth'])->group(function () {
     // Admin & Operations Management Dashboard CRM
     Route::prefix('dashboard')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/raffle', [HammerChallengeController::class, 'raffle'])->name('dashboard.raffle');
         Route::patch('/inquiries/{inquiry}', [DashboardController::class, 'updateInquiryStatus'])->name('dashboard.inquiries.update');
         Route::delete('/inquiries/{inquiry}', [DashboardController::class, 'destroyInquiry'])->name('dashboard.inquiries.destroy');
         Route::post('/campaigns', [DashboardController::class, 'storeCampaign'])->name('dashboard.campaigns.store');

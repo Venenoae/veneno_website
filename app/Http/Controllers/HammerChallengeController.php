@@ -230,6 +230,90 @@ class HammerChallengeController extends Controller
         ]);
     }
 
+    public function raffle(Request $request): Response
+    {
+        $eligibleCount = HammerAudienceRegistration::eligibleForRaffle()->count();
+        $recentWinners = HammerAudienceRegistration::winners()
+            ->take(10)
+            ->get(['id', 'full_name', 'ticket_number', 'won_at']);
+
+        return Inertia::render('HammerChallenge/Raffle', [
+            'initialEligibleCount' => $eligibleCount,
+            'recentWinners' => $recentWinners,
+        ]);
+    }
+
+    public function getRaffleParticipants(): JsonResponse
+    {
+        $participants = HammerAudienceRegistration::eligibleForRaffle()
+            ->get(['id', 'full_name', 'ticket_number']);
+
+        $winners = HammerAudienceRegistration::winners()
+            ->get(['id', 'full_name', 'ticket_number', 'won_at']);
+
+        return response()->json([
+            'success' => true,
+            'count' => $participants->count(),
+            'participants' => $participants,
+            'winners' => $winners,
+        ]);
+    }
+
+    public function drawRaffleWinner(Request $request): JsonResponse
+    {
+        return DB::transaction(function () use ($request) {
+            $participantId = $request->input('participant_id');
+
+            $query = HammerAudienceRegistration::query()
+                ->where('is_winner', false)
+                ->lockForUpdate();
+
+            if ($participantId) {
+                $winner = $query->find($participantId);
+            } else {
+                $winner = $query->inRandomOrder()->first();
+            }
+
+            if (!$winner) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No eligible participants found for the raffle draw.',
+                ], 404);
+            }
+
+            $winner->update([
+                'is_winner' => true,
+                'won_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'winner' => [
+                    'id' => $winner->id,
+                    'full_name' => $winner->full_name,
+                    'ticket_number' => $winner->ticket_number,
+                    'won_at' => $winner->won_at?->format('H:i:s • d M Y'),
+                ],
+                'remaining_count' => HammerAudienceRegistration::eligibleForRaffle()->count(),
+            ]);
+        });
+    }
+
+    public function resetRaffleWinners(): JsonResponse
+    {
+        HammerAudienceRegistration::query()->update([
+            'is_winner' => false,
+            'won_at' => null,
+            'prize_claimed' => false,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'All raffle winners have been reset.',
+            'count' => HammerAudienceRegistration::count(),
+        ]);
+    }
+
     private function normalizePhone(string $phone): string
     {
         $normalized = preg_replace('/[^+0-9]/', '', trim($phone));

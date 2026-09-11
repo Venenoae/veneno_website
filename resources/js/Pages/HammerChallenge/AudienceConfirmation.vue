@@ -64,7 +64,7 @@ const openGoogleMaps = () => {
     <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(239,68,68,0.28),transparent_50%),radial-gradient(circle_at_85%_95%,rgba(163,230,53,0.10),transparent_40%)]"></div>
 
     <!-- Header Navigation -->
-    <header class="relative z-10 w-full max-w-2xl mx-auto flex items-center justify-between pb-4 gap-3">
+    <header class="relative z-50 w-full max-w-2xl mx-auto flex items-center justify-between pb-4 gap-3">
       <Link href="/" class="flex items-center gap-3 group">
         <div class="w-10 h-10 rounded-xl overflow-hidden border border-red-500/50 bg-red-600 flex items-center justify-center p-1.5 shadow-lg shadow-red-950/50 group-hover:scale-105 transition">
           <img 

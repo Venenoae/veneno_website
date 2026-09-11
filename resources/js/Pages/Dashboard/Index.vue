@@ -460,6 +460,17 @@ const handleLogout = () => {
 
         <!-- Right: Admin Profile Chip & Direct Quick Controls -->
         <div class="flex flex-wrap items-center gap-2.5 relative" ref="profileDropdownRef">
+          <!-- Direct Live Raffle Screen Button -->
+          <a
+            href="/dashboard/raffle"
+            target="_blank"
+            class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-red-600/30 to-lime-500/20 hover:from-red-600/50 hover:to-lime-500/40 border border-red-500/60 hover:border-lime-400 text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md cursor-pointer active:scale-95"
+            title="Open 10-Second Live Audience Raffle Screen"
+          >
+            <Trophy class="w-3.5 h-3.5 text-[#a3e635]" />
+            <span class="font-mono">Live Raffle Screen 🎟️</span>
+          </a>
+
           <!-- Direct Quick Change Password Button -->
           <button
             type="button"
@@ -1056,6 +1067,15 @@ const handleLogout = () => {
                 </select>
 
                 <a
+                  href="/dashboard/raffle"
+                  target="_blank"
+                  class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-[#a3e635] hover:brightness-110 px-4 py-2.5 text-xs font-bold uppercase text-white transition-all shadow-md"
+                >
+                  <Trophy class="w-3.5 h-3.5 text-white" />
+                  <span>Launch Raffle 🎟️</span>
+                </a>
+
+                <a
                   :href="route('dashboard.hammer-challenge.audience.export')"
                   class="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 px-4 py-2.5 text-xs font-bold uppercase text-amber-300 transition-colors"
                 >
@@ -1081,9 +1101,14 @@ const handleLogout = () => {
                 <tbody class="divide-y divide-zinc-800/80">
                   <tr v-for="aud in filteredHammerAudiences" :key="aud.id" class="hover:bg-zinc-900/50">
                     <td class="p-3">
-                      <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold font-mono text-[11px]">
-                        {{ aud.ticket_number }}
-                      </span>
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold font-mono text-[11px]">
+                          {{ aud.ticket_number }}
+                        </span>
+                        <span v-if="aud.is_winner" class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[9px] font-bold uppercase font-mono animate-pulse">
+                          🏆 Winner
+                        </span>
+                      </div>
                     </td>
                     <td class="p-3 font-bold text-white">{{ aud.full_name }}</td>
                     <td class="p-3">

@@ -153,7 +153,7 @@ const handleAudienceSubmit = async () => {
     <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_55%,rgba(239,68,68,0.12),transparent_40%)]"></div>
 
     <!-- Header Navigation with Main Website Language Dropdown -->
-    <header class="relative z-10 w-full max-w-4xl mx-auto px-4 pt-6 pb-4 flex items-center justify-between gap-3">
+    <header class="relative z-50 w-full max-w-4xl mx-auto px-4 pt-6 pb-4 flex items-center justify-between gap-3">
       <Link href="/" class="flex items-center gap-3 group">
         <div class="w-10 h-10 rounded-xl overflow-hidden border border-red-500/50 shadow-lg shadow-red-950/50 group-hover:scale-105 transition bg-red-600 flex items-center justify-center p-1.5 ring-1 ring-red-400/30">
           <img 
