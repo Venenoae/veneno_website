@@ -49,6 +49,7 @@ const props = defineProps({
   inquiries: { type: Array, default: () => [] },
   inquiryStats: { type: Object, default: () => ({}) },
   hammerRegistrations: { type: Array, default: () => [] },
+  hammerAudiences: { type: Array, default: () => [] },
   users: { type: Array, default: () => [] },
 });
 
@@ -212,6 +213,33 @@ const handleDeleteInquiry = (inquiryId) => {
       preserveScroll: true,
     });
   }
+};
+
+const hammerSubTab = ref('audience'); // 'audience' | 'contestants'
+
+const hammerAudienceSearch = ref('');
+const hammerAudienceStatusFilter = ref('all');
+
+const filteredHammerAudiences = computed(() => {
+  let list = props.hammerAudiences || [];
+
+  if (hammerAudienceStatusFilter.value !== 'all') {
+    list = list.filter(a => a.status === hammerAudienceStatusFilter.value);
+  }
+
+  const query = hammerAudienceSearch.value.trim().toLowerCase();
+  if (query) {
+    list = list.filter(a =>
+      [a.ticket_number, a.full_name, a.mobile, a.email]
+        .some(v => v && v.toLowerCase().includes(query))
+    );
+  }
+
+  return list;
+});
+
+const updateHammerAudienceStatus = (audienceId, status) => {
+  router.patch(route('dashboard.hammer-challenge.audience.status', audienceId), { status }, { preserveScroll: true });
 };
 
 const hammerSearch = ref('');
@@ -726,7 +754,7 @@ const handleLogout = () => {
           :class="currentTab === 'hammer' ? 'text-red-400 border-red-400 bg-red-500/5 rounded-t-xl' : 'text-zinc-400 border-transparent hover:text-zinc-200'"
         >
           <Trophy class="w-3.5 h-3.5" />
-          <span>Hammer Challenge ({{ hammerRegistrations?.length || 0 }})</span>
+          <span>Hammer Event ({{ (hammerAudiences?.length || 0) + (hammerRegistrations?.length || 0) }})</span>
         </button>
       </div>
 
@@ -933,18 +961,244 @@ const handleLogout = () => {
         </div>
       </div>
 
-      <!-- TAB 3: HAMMER CHALLENGE PARTICIPANTS -->
+      <!-- TAB 3: VENENO HAMMER EVENT (AUDIENCE & CONTESTANTS) -->
       <div v-if="currentTab === 'hammer'" class="space-y-6 animate-in fade-in duration-200">
         <div class="rounded-3xl border border-zinc-800/90 bg-zinc-950/70 p-6 shadow-2xl space-y-6">
-          <div class="flex flex-col gap-4 border-b border-zinc-800/80 pb-6 md:flex-row md:items-center md:justify-between">
-            <div><h3 class="text-lg font-bold uppercase text-white font-display">Hammer Challenge Participants</h3><p class="mt-1 text-xs text-zinc-400">Registered participants for 12 September 2026.</p></div>
-            <a :href="route('dashboard.hammer-challenge.export')" class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold uppercase text-white hover:bg-emerald-500"><Printer class="w-3.5 h-3.5" /> Export to Excel</a>
+          
+          <!-- Top Header & Quick Kiosk Launchers -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-red-600/20 to-amber-500/20 border border-red-500/40 text-red-400 flex items-center justify-center shrink-0">
+                  <Trophy class="w-5 h-5 text-red-400" />
+                </div>
+                <div>
+                  <h3 class="text-lg font-black uppercase text-white font-display">Veneno Hammer Challenge 2026</h3>
+                  <p class="text-xs text-zinc-400">12 September 2026 • AED 15,000 Cash Prize Event Telemetry & Visitor Management</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5">
+              <!-- Big Screen Display Launch -->
+              <a
+                href="/hammer-challenge/display"
+                target="_blank"
+                class="px-4 py-2.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white text-xs font-mono font-bold flex items-center gap-2 transition-all shadow-sm"
+                title="Launch Audience QR Code Big-Screen Kiosk Display"
+              >
+                <Tv class="w-3.5 h-3.5 text-red-400" />
+                <span>Audience Big Screen</span>
+              </a>
+
+              <!-- Audience Registration Page -->
+              <a
+                href="/hammer-challenge/audience"
+                target="_blank"
+                class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:brightness-110 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 shadow-md transition-all active:scale-95"
+                title="Open Live Audience Pass Registration Page"
+              >
+                <Users class="w-3.5 h-3.5" />
+                <span>Audience Form</span>
+                <ExternalLink class="w-3 h-3" />
+              </a>
+            </div>
           </div>
-          <div class="flex flex-col gap-3 md:flex-row">
-            <div class="relative flex-1"><Search class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" /><input v-model="hammerSearch" type="search" placeholder="Search name, registration number, mobile, email..." class="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-4 text-xs text-white placeholder-zinc-500 focus:border-red-500 focus:outline-none" /></div>
-            <select v-model="hammerStatusFilter" class="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-xs text-zinc-300 focus:border-red-500 focus:outline-none"><option value="all">All Statuses</option><option value="registered">Registered</option><option value="checked_in">Checked-in</option><option value="participated">Participated</option><option value="disqualified">Disqualified</option><option value="finished">Finished</option></select>
+
+          <!-- Sub-Tab Switcher: Audience vs Contestants -->
+          <div class="flex items-center gap-2 border-b border-zinc-800/80 pb-px text-xs font-mono uppercase tracking-wider">
+            <button
+              type="button"
+              @click="hammerSubTab = 'audience'"
+              class="py-2.5 px-4 border-b-2 font-bold transition-all flex items-center gap-2 cursor-pointer"
+              :class="hammerSubTab === 'audience' ? 'text-amber-400 border-amber-400 bg-amber-500/10 rounded-t-xl' : 'text-zinc-400 border-transparent hover:text-zinc-200'"
+            >
+              <Users class="w-3.5 h-3.5" />
+              <span>Audience & Visitors ({{ hammerAudiences?.length || 0 }})</span>
+            </button>
+
+            <button
+              type="button"
+              @click="hammerSubTab = 'contestants'"
+              class="py-2.5 px-4 border-b-2 font-bold transition-all flex items-center gap-2 cursor-pointer"
+              :class="hammerSubTab === 'contestants' ? 'text-red-400 border-red-400 bg-red-500/10 rounded-t-xl' : 'text-zinc-400 border-transparent hover:text-zinc-200'"
+            >
+              <Trophy class="w-3.5 h-3.5" />
+              <span>Contestant Athletes ({{ hammerRegistrations?.length || 0 }})</span>
+            </button>
           </div>
-          <div class="overflow-x-auto rounded-2xl border border-zinc-800"><table class="w-full text-left text-xs font-mono"><thead class="bg-zinc-900 text-[10px] uppercase text-zinc-400"><tr><th class="p-3">Participant</th><th class="p-3">Contact</th><th class="p-3">Emergency Contact</th><th class="p-3">Registered</th><th class="p-3">Status</th></tr></thead><tbody class="divide-y divide-zinc-800/80"><tr v-for="registration in filteredHammerRegistrations" :key="registration.id" class="hover:bg-zinc-900/50"><td class="p-3"><div class="font-bold text-white">{{ registration.full_name }}</div><div class="mt-1 text-red-400">{{ registration.registration_number }}</div><div class="mt-1 text-zinc-500">DOB {{ registration.date_of_birth }} ({{ registration.age }})</div></td><td class="p-3"><div class="text-zinc-200">{{ registration.mobile }}</div><div class="mt-1 text-zinc-500">{{ registration.email }}</div></td><td class="p-3"><div class="text-zinc-200">{{ registration.emergency_contact_name }}</div><div class="mt-1 text-zinc-500">{{ registration.emergency_contact_number }}</div></td><td class="p-3 text-zinc-400">{{ new Date(registration.created_at).toLocaleString('en-GB') }}</td><td class="p-3"><select :value="registration.status" @change="updateHammerStatus(registration.id, $event.target.value)" class="rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-2 text-[11px] text-zinc-200"><option value="registered">Registered</option><option value="checked_in">Checked-in</option><option value="participated">Participated</option><option value="disqualified">Disqualified</option><option value="finished">Finished</option></select></td></tr><tr v-if="filteredHammerRegistrations.length === 0"><td colspan="5" class="p-10 text-center text-zinc-500">No Hammer Challenge registrations found.</td></tr></tbody></table></div>
+
+          <!-- ============================================== -->
+          <!-- SUB-TAB 1: AUDIENCE & VISITORS                 -->
+          <!-- ============================================== -->
+          <div v-if="hammerSubTab === 'audience'" class="space-y-4 animate-in fade-in duration-150">
+            <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+              <div class="relative flex-1">
+                <Search class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                <input
+                  v-model="hammerAudienceSearch"
+                  type="search"
+                  placeholder="Search visitor name, ticket number (VHA-XXXX), mobile, email..."
+                  class="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-4 text-xs text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none"
+                />
+              </div>
+
+              <div class="flex items-center gap-2">
+                <select
+                  v-model="hammerAudienceStatusFilter"
+                  class="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-xs text-zinc-300 focus:border-amber-400 focus:outline-none"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="registered">Registered</option>
+                  <option value="checked_in">Checked-in</option>
+                  <option value="attended">Attended</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+
+                <a
+                  :href="route('dashboard.hammer-challenge.audience.export')"
+                  class="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 px-4 py-2.5 text-xs font-bold uppercase text-amber-300 transition-colors"
+                >
+                  <Printer class="w-3.5 h-3.5 text-amber-400" />
+                  <span>Export CSV</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Audience Table -->
+            <div class="overflow-x-auto rounded-2xl border border-zinc-800">
+              <table class="w-full text-left text-xs font-mono">
+                <thead class="bg-zinc-900 text-[10px] uppercase text-zinc-400">
+                  <tr>
+                    <th class="p-3">Ticket Pass #</th>
+                    <th class="p-3">Visitor Name</th>
+                    <th class="p-3">Contact</th>
+                    <th class="p-3">Registered Date</th>
+                    <th class="p-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800/80">
+                  <tr v-for="aud in filteredHammerAudiences" :key="aud.id" class="hover:bg-zinc-900/50">
+                    <td class="p-3">
+                      <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold font-mono text-[11px]">
+                        {{ aud.ticket_number }}
+                      </span>
+                    </td>
+                    <td class="p-3 font-bold text-white">{{ aud.full_name }}</td>
+                    <td class="p-3">
+                      <div class="text-zinc-200">{{ aud.mobile }}</div>
+                      <div v-if="aud.email" class="mt-0.5 text-zinc-500 text-[11px]">{{ aud.email }}</div>
+                      <div v-else class="text-zinc-600 text-[10px] italic">No email provided</div>
+                    </td>
+                    <td class="p-3 text-zinc-400 text-[11px]">{{ new Date(aud.created_at).toLocaleString('en-GB') }}</td>
+                    <td class="p-3">
+                      <select
+                        :value="aud.status"
+                        @change="updateHammerAudienceStatus(aud.id, $event.target.value)"
+                        class="rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-1.5 text-[11px] text-zinc-200 focus:outline-none focus:border-amber-400"
+                      >
+                        <option value="registered">Registered</option>
+                        <option value="checked_in">Checked-in</option>
+                        <option value="attended">Attended</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr v-if="filteredHammerAudiences.length === 0">
+                    <td colspan="5" class="p-10 text-center text-zinc-500">No Audience or Visitor passes registered yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- SUB-TAB 2: CONTESTANT ATHLETES                 -->
+          <!-- ============================================== -->
+          <div v-if="hammerSubTab === 'contestants'" class="space-y-4 animate-in fade-in duration-150">
+            <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+              <div class="relative flex-1">
+                <Search class="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                <input
+                  v-model="hammerSearch"
+                  type="search"
+                  placeholder="Search contestant name, registration number, mobile, email..."
+                  class="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-4 text-xs text-white placeholder-zinc-500 focus:border-red-500 focus:outline-none"
+                />
+              </div>
+
+              <div class="flex items-center gap-2">
+                <select
+                  v-model="hammerStatusFilter"
+                  class="rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-xs text-zinc-300 focus:border-red-500 focus:outline-none"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="registered">Registered</option>
+                  <option value="checked_in">Checked-in</option>
+                  <option value="participated">Participated</option>
+                  <option value="disqualified">Disqualified</option>
+                  <option value="finished">Finished</option>
+                </select>
+
+                <a
+                  :href="route('dashboard.hammer-challenge.export')"
+                  class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2.5 text-xs font-bold uppercase text-white transition-colors"
+                >
+                  <Printer class="w-3.5 h-3.5" />
+                  <span>Export CSV</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Contestants Table -->
+            <div class="overflow-x-auto rounded-2xl border border-zinc-800">
+              <table class="w-full text-left text-xs font-mono">
+                <thead class="bg-zinc-900 text-[10px] uppercase text-zinc-400">
+                  <tr>
+                    <th class="p-3">Participant</th>
+                    <th class="p-3">Contact</th>
+                    <th class="p-3">Emergency Contact</th>
+                    <th class="p-3">Registered</th>
+                    <th class="p-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800/80">
+                  <tr v-for="registration in filteredHammerRegistrations" :key="registration.id" class="hover:bg-zinc-900/50">
+                    <td class="p-3">
+                      <div class="font-bold text-white">{{ registration.full_name }}</div>
+                      <div class="mt-1 text-red-400 font-bold">{{ registration.registration_number }}</div>
+                      <div class="mt-1 text-zinc-500">DOB {{ registration.date_of_birth }} ({{ registration.age }})</div>
+                    </td>
+                    <td class="p-3">
+                      <div class="text-zinc-200">{{ registration.mobile }}</div>
+                      <div class="mt-1 text-zinc-500">{{ registration.email }}</div>
+                    </td>
+                    <td class="p-3">
+                      <div class="text-zinc-200">{{ registration.emergency_contact_name }}</div>
+                      <div class="mt-1 text-zinc-500">{{ registration.emergency_contact_number }}</div>
+                    </td>
+                    <td class="p-3 text-zinc-400">{{ new Date(registration.created_at).toLocaleString('en-GB') }}</td>
+                    <td class="p-3">
+                      <select
+                        :value="registration.status"
+                        @change="updateHammerStatus(registration.id, $event.target.value)"
+                        class="rounded-lg border border-zinc-700 bg-zinc-950 px-2 py-2 text-[11px] text-zinc-200"
+                      >
+                        <option value="registered">Registered</option>
+                        <option value="checked_in">Checked-in</option>
+                        <option value="participated">Participated</option>
+                        <option value="disqualified">Disqualified</option>
+                        <option value="finished">Finished</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr v-if="filteredHammerRegistrations.length === 0">
+                    <td colspan="5" class="p-10 text-center text-zinc-500">No Hammer Challenge contestant registrations found.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -26,11 +26,36 @@ Route::get('/{locale}/adihex/terms', [AdihexController::class, 'terms'])
 Route::get('/{locale}/adihex/display', [AdihexController::class, 'display'])
     ->where('locale', 'en|ar');
 
-// Hammer Challenge 2026 local event flow
+// Hammer Challenge 2026 local event flow - Contestants
 Route::get('/hammer-challenge', [HammerChallengeController::class, 'index'])->name('hammer-challenge.index');
 Route::get('/hammer-challenge/register', [HammerChallengeController::class, 'index'])->name('hammer-challenge.register');
 Route::get('/hammer-challenge/terms', [HammerChallengeController::class, 'terms'])->name('hammer-challenge.terms');
 Route::get('/hammer-challenge/confirmation', [HammerChallengeController::class, 'confirmation'])->name('hammer-challenge.confirmation');
+
+// Hammer Challenge Big Screen Display / QR Kiosk
+Route::get('/hammer-challenge/display', [HammerChallengeController::class, 'display'])->name('hammer-challenge.display');
+Route::get('/hammer-challenge/screen', [HammerChallengeController::class, 'display'])->name('hammer-challenge.screen');
+
+// Hammer Challenge Audience & Visitor Registration Flow
+Route::get('/hammer-challenge/audience', [HammerChallengeController::class, 'audience'])->name('hammer-challenge.audience');
+Route::get('/hammer-challenge/visitor', [HammerChallengeController::class, 'audience'])->name('hammer-challenge.visitor');
+Route::get('/hammer-challenge/audience/confirmation', [HammerChallengeController::class, 'audienceConfirmation'])->name('hammer-challenge.audience.confirmation');
+
+// Multilingual URL prefix fallbacks (en | ar) for Hammer Challenge
+Route::get('/{locale}/hammer-challenge', [HammerChallengeController::class, 'index'])
+    ->where('locale', 'en|ar');
+Route::get('/{locale}/hammer-challenge/register', [HammerChallengeController::class, 'index'])
+    ->where('locale', 'en|ar');
+Route::get('/{locale}/hammer-challenge/display', [HammerChallengeController::class, 'display'])
+    ->where('locale', 'en|ar');
+Route::get('/{locale}/hammer-challenge/screen', [HammerChallengeController::class, 'display'])
+    ->where('locale', 'en|ar');
+Route::get('/{locale}/hammer-challenge/audience', [HammerChallengeController::class, 'audience'])
+    ->where('locale', 'en|ar');
+Route::get('/{locale}/hammer-challenge/visitor', [HammerChallengeController::class, 'audience'])
+    ->where('locale', 'en|ar');
+Route::get('/{locale}/hammer-challenge/audience/confirmation', [HammerChallengeController::class, 'audienceConfirmation'])
+    ->where('locale', 'en|ar');
 
 // Multilingual URL prefix fallbacks (en | ar)
 Route::get('/{locale}', [StorefrontController::class, 'home'])
@@ -47,8 +72,12 @@ Route::post('/api/adihex/spin', [AdihexController::class, 'spin'])->name('api.ad
 Route::post('/api/adihex/reserve', [AdihexController::class, 'reserve'])->name('api.adihex.reserve');
 Route::post('/api/adihex/payment-intent', [AdihexController::class, 'createPaymentIntent'])->name('api.adihex.payment-intent');
 Route::post('/api/adihex/redeem', [AdihexController::class, 'redeemVoucher'])->name('api.adihex.redeem');
+
+// Hammer Challenge APIs
 Route::post('/api/hammer-challenge/register', [HammerChallengeController::class, 'register'])->name('api.hammer-challenge.register');
 Route::get('/api/hammer-challenge/confirmation/{token}', [HammerChallengeController::class, 'confirmationData'])->name('api.hammer-challenge.confirmation');
+Route::post('/api/hammer-challenge/audience', [HammerChallengeController::class, 'registerAudience'])->name('api.hammer-challenge.audience');
+Route::get('/api/hammer-challenge/audience/confirmation/{token}', [HammerChallengeController::class, 'audienceConfirmationData'])->name('api.hammer-challenge.audience.confirmation');
 
 // Booking Engine
 Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
@@ -82,6 +111,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/adihex/export', [AdihexController::class, 'exportLeads'])->name('dashboard.adihex.export');
         Route::patch('/hammer-challenge/{registration}/status', [DashboardController::class, 'updateHammerRegistrationStatus'])->name('dashboard.hammer-challenge.status');
         Route::get('/hammer-challenge/export', [DashboardController::class, 'exportHammerRegistrations'])->name('dashboard.hammer-challenge.export');
+        Route::patch('/hammer-challenge/audience/{audience}/status', [DashboardController::class, 'updateHammerAudienceStatus'])->name('dashboard.hammer-challenge.audience.status');
+        Route::get('/hammer-challenge/audience/export', [DashboardController::class, 'exportHammerAudience'])->name('dashboard.hammer-challenge.audience.export');
         Route::post('/change-password', [DashboardController::class, 'changePassword'])->name('dashboard.password.change');
         Route::post('/users/{user}/reset-password', [DashboardController::class, 'resetUserPassword'])->name('dashboard.users.reset-password');
     });

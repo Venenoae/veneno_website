@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AdihexLead;
 use App\Models\HammerChallengeRegistration;
+use App\Models\HammerAudienceRegistration;
 use App\Models\Inquiry;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -23,6 +24,7 @@ class DashboardController extends Controller
         $adihexLeads = AdihexLead::latest()->get();
         $inquiries = Inquiry::latest()->get();
         $hammerRegistrations = HammerChallengeRegistration::latest()->get();
+        $hammerAudiences = HammerAudienceRegistration::latest()->get();
         $users = User::with('roles')->latest()->get()->map(function ($u) {
             return [
                 'id' => $u->id,
@@ -58,6 +60,7 @@ class DashboardController extends Controller
             'adihexLeads' => $adihexLeads,
             'inquiries' => $inquiries,
             'hammerRegistrations' => $hammerRegistrations,
+            'hammerAudiences' => $hammerAudiences,
             'users' => $users,
             'adihexStats' => [
                 'totalSpins' => $adihexTotalSpins,
@@ -105,17 +108,6 @@ class DashboardController extends Controller
         return back()->with('success', 'Inquiry deleted successfully.');
     }
 
-    public function updateHammerRegistrationStatus(Request $request, HammerChallengeRegistration $registration)
-    {
-        $validated = $request->validate([
-            'status' => 'required|in:registered,checked_in,participated,disqualified,finished',
-        ]);
-
-        $registration->update($validated);
-
-        return back()->with('success', 'Hammer Challenge status updated.');
-    }
-
     /**
      * Change logged-in user password.
      */
@@ -148,6 +140,59 @@ class DashboardController extends Controller
         ]);
 
         return back()->with('success', "Password for {$user->name} ({$user->email}) was successfully reset.");
+    }
+
+    public function updateHammerRegistrationStatus(Request $request, HammerChallengeRegistration $registration)
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:registered,checked_in,participated,disqualified,finished'],
+        ]);
+
+        $registration->update(['status' => $validated['status']]);
+
+        return back()->with('success', 'Participant status updated successfully.');
+    }
+
+    public function updateHammerAudienceStatus(Request $request, HammerAudienceRegistration $audience)
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:registered,checked_in,attended,cancelled'],
+        ]);
+
+        $audience->update(['status' => $validated['status']]);
+
+        return back()->with('success', 'Audience visitor status updated successfully.');
+    }
+
+    public function exportHammerAudience(): StreamedResponse
+    {
+        $fileName = 'veneno_hammer_audience_' . now()->format('Y_m_d_His') . '.csv';
+        $audiences = HammerAudienceRegistration::latest()->get();
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename={$fileName}",
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        ];
+
+        return response()->stream(function () use ($audiences) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, [
+                'Ticket Number', 'Full Name', 'Mobile', 'Email', 'Registration Date & Time', 'Status',
+            ]);
+
+            foreach ($audiences as $audience) {
+                fputcsv($file, [
+                    $audience->ticket_number,
+                    $audience->full_name,
+                    $audience->mobile,
+                    $audience->email ?? 'N/A',
+                    $audience->created_at?->format('Y-m-d H:i:s'),
+                    $audience->status,
+                ]);
+            }
+
+            fclose($file);
+        }, 200, $headers);
     }
 
     public function exportHammerRegistrations(): StreamedResponse
