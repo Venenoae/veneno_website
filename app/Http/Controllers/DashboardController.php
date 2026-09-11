@@ -7,6 +7,8 @@ use App\Models\HammerChallengeRegistration;
 use App\Models\HammerAudienceRegistration;
 use App\Models\Inquiry;
 use App\Models\User;
+use App\Services\SmsGlobalService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -162,6 +164,29 @@ class DashboardController extends Controller
         $audience->update(['status' => $validated['status']]);
 
         return back()->with('success', 'Audience visitor status updated successfully.');
+    }
+
+    public function sendHammerWinnerSms(Request $request, HammerAudienceRegistration $audience, SmsGlobalService $smsService): JsonResponse
+    {
+        $customMessage = $request->input('message');
+        $result = $smsService->sendHammerWinnerSms($audience, $customMessage);
+
+        if ($result['success'] ?? false) {
+            $audience->update([
+                'sms_sent_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Winner SMS successfully sent to {$audience->full_name} ({$audience->mobile}).",
+                'sms_sent_at' => $audience->sms_sent_at?->format('H:i • d M'),
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $result['error'] ?? $result['message'] ?? 'Failed to send SMS via SMSGlobal gateway.',
+        ], 422);
     }
 
     public function exportHammerAudience(): StreamedResponse

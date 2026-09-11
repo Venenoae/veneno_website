@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\HammerChallengeRegistration;
 use App\Models\HammerAudienceRegistration;
+use App\Services\SmsGlobalService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -312,6 +313,29 @@ class HammerChallengeController extends Controller
             'message' => 'All raffle winners have been reset.',
             'count' => HammerAudienceRegistration::count(),
         ]);
+    }
+
+    public function sendRaffleWinnerSms(Request $request, HammerAudienceRegistration $audience, SmsGlobalService $smsService): JsonResponse
+    {
+        $customMessage = $request->input('message');
+        $result = $smsService->sendHammerWinnerSms($audience, $customMessage);
+
+        if ($result['success'] ?? false) {
+            $audience->update([
+                'sms_sent_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Winner notification SMS sent to {$audience->mobile}!",
+                'sms_sent_at' => $audience->sms_sent_at?->format('H:i • d M'),
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => $result['error'] ?? $result['message'] ?? 'SMS dispatch failed.',
+        ], 422);
     }
 
     private function normalizePhone(string $phone): string

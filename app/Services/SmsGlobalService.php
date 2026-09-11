@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AdihexLead;
+use App\Models\HammerAudienceRegistration;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -162,5 +163,26 @@ class SmsGlobalService
         }
 
         return $this->sendSms($lead->phone, $message);
+    }
+
+    /**
+     * Send Hammer Challenge Audience Raffle Winner Notification SMS
+     */
+    public function sendHammerWinnerSms(HammerAudienceRegistration $audience, ?string $customMessage = null): array
+    {
+        if ($customMessage && trim($customMessage)) {
+            return $this->sendSms($audience->mobile, trim($customMessage));
+        }
+
+        $name = $audience->full_name;
+        $ticket = $audience->ticket_number;
+
+        $message = "مبروك للفائز {$name}! 🎉\n"
+            . "تهانينا! لقد فازت تذكرتك ({$ticket}) رسمياً بسحب جوائز الجمهور في تحدي مطرقة فينينو 2026.\n"
+            . "يرجى التوجه للمنصة أو مراجعة إدارة المركز لاستلام جائزتك.\n"
+            . "مركز فينينو للعناية بالسيارات - مصفح M37، أبوظبي\n"
+            . "هاتف: +97126344403";
+
+        return $this->sendSms($audience->mobile, $message);
     }
 }

@@ -19,6 +19,7 @@ class HammerAudienceRegistration extends Model
         'is_winner',
         'won_at',
         'prize_claimed',
+        'sms_sent_at',
         'status',
         'ip_address',
         'user_agent',
@@ -28,6 +29,7 @@ class HammerAudienceRegistration extends Model
         'is_winner' => 'boolean',
         'prize_claimed' => 'boolean',
         'won_at' => 'datetime',
+        'sms_sent_at' => 'datetime',
     ];
 
     public function scopeEligibleForRaffle($query)

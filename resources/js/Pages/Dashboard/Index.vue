@@ -242,6 +242,73 @@ const updateHammerAudienceStatus = (audienceId, status) => {
   router.patch(route('dashboard.hammer-challenge.audience.status', audienceId), { status }, { preserveScroll: true });
 };
 
+// ==========================================
+// Hammer Audience Winner SMS Outreach
+// ==========================================
+const isWinnerSmsModalOpen = ref(false);
+const selectedWinnerForSms = ref(null);
+const winnerSmsMessage = ref('');
+const winnerSmsLang = ref('ar');
+const isSendingWinnerSms = ref(false);
+const winnerSmsFeedback = ref(null);
+
+const setWinnerSmsTemplate = (lang) => {
+  winnerSmsLang.value = lang;
+  if (!selectedWinnerForSms.value) return;
+  const name = selectedWinnerForSms.value.full_name;
+  const ticket = selectedWinnerForSms.value.ticket_number;
+
+  if (lang === 'ar') {
+    winnerSmsMessage.value = `مبروك للفائز ${name}! 🎉\nتهانينا، لقد فازت تذكرتك (${ticket}) رسمياً بسحب جوائز الجمهور في تحدي مطرقة فينينو 2026!\nيرجى التوجه إلى المنصة أو مراجعة إدارة المركز لاستلام جائزتك.\nمركز فينينو للعناية بالسيارات - مصفح M37، أبوظبي\nهاتف: +97126344403`;
+  } else {
+    winnerSmsMessage.value = `Congratulations ${name}! 🎉\nYou have won the official Audience Raffle Draw (Ticket #${ticket}) at the Veneno Hammer Challenge 2026!\nPlease report to the main stage or management to claim your prize.\nVeneno Auto Care Center - Musaffah M37, Abu Dhabi\nTel: +97126344403`;
+  }
+};
+
+const openWinnerSmsModal = (aud) => {
+  selectedWinnerForSms.value = aud;
+  winnerSmsFeedback.value = null;
+  setWinnerSmsTemplate('ar');
+  isWinnerSmsModalOpen.value = true;
+};
+
+const handleSendWinnerSms = async () => {
+  if (!selectedWinnerForSms.value || !winnerSmsMessage.value.trim()) return;
+  isSendingWinnerSms.value = true;
+  winnerSmsFeedback.value = null;
+
+  try {
+    const res = await window.axios.post(
+      route('dashboard.hammer-challenge.audience.send-sms', selectedWinnerForSms.value.id),
+      { message: winnerSmsMessage.value.trim() }
+    );
+
+    if (res.data.success) {
+      winnerSmsFeedback.value = {
+        type: 'success',
+        text: res.data.message || 'Winner SMS sent successfully!',
+      };
+      selectedWinnerForSms.value.sms_sent_at = new Date().toISOString();
+      const target = props.hammerAudiences.find(a => a.id === selectedWinnerForSms.value.id);
+      if (target) {
+        target.sms_sent_at = new Date().toISOString();
+      }
+    } else {
+      winnerSmsFeedback.value = {
+        type: 'error',
+        text: res.data.message || 'Failed to deliver SMS.',
+      };
+    }
+  } catch (err) {
+    winnerSmsFeedback.value = {
+      type: 'error',
+      text: err.response?.data?.message || 'Error occurred while sending SMS.',
+    };
+  } finally {
+    isSendingWinnerSms.value = false;
+  }
+};
+
 const hammerSearch = ref('');
 const hammerStatusFilter = ref('all');
 
@@ -1096,6 +1163,7 @@ const handleLogout = () => {
                     <th class="p-3">Google Reviewer</th>
                     <th class="p-3">Registered Date</th>
                     <th class="p-3">Status</th>
+                    <th class="p-3 text-right">Actions / SMS</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-zinc-800/80">
@@ -1136,9 +1204,30 @@ const handleLogout = () => {
                         <option value="cancelled">Cancelled</option>
                       </select>
                     </td>
+                    <td class="p-3 text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          @click="openWinnerSmsModal(aud)"
+                          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm cursor-pointer"
+                          :class="aud.sms_sent_at 
+                            ? 'bg-emerald-950/60 border border-emerald-600/60 text-emerald-300 hover:bg-emerald-900/60' 
+                            : aud.is_winner 
+                              ? 'bg-red-600 hover:bg-red-500 text-white shadow-md shadow-red-950/60 ring-2 ring-red-400/50' 
+                              : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300'"
+                          :title="aud.sms_sent_at ? 'Resend Winner SMS' : 'Send Winner SMS'"
+                        >
+                          <Send class="w-3 h-3" />
+                          <span>{{ aud.sms_sent_at ? 'SMS Sent' : 'Send SMS' }}</span>
+                        </button>
+                      </div>
+                      <div v-if="aud.sms_sent_at" class="text-[9px] text-emerald-400 font-mono mt-0.5">
+                        ✓ {{ new Date(aud.sms_sent_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }}
+                      </div>
+                    </td>
                   </tr>
                   <tr v-if="filteredHammerAudiences.length === 0">
-                    <td colspan="6" class="p-10 text-center text-zinc-500">No Audience or Visitor passes registered yet.</td>
+                    <td colspan="7" class="p-10 text-center text-zinc-500">No Audience or Visitor passes registered yet.</td>
                   </tr>
                 </tbody>
               </table>
@@ -1516,6 +1605,119 @@ const handleLogout = () => {
             class="py-3 px-4 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white font-mono text-xs transition-colors cursor-pointer"
           >
             Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- Hammer Audience Winner SMS Dispatch Modal  -->
+    <!-- ========================================== -->
+    <div
+      v-if="isWinnerSmsModalOpen && selectedWinnerForSms"
+      class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+    >
+      <div class="w-full max-w-lg rounded-3xl border border-red-500/50 bg-zinc-950 p-6 shadow-2xl space-y-4">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-red-600/20 text-red-400 flex items-center justify-center border border-red-500/30">
+              <Send class="w-5 h-5" />
+            </div>
+            <div>
+              <h3 class="text-sm font-black text-white">Send Official Winner SMS</h3>
+              <p class="text-[11px] text-zinc-400 font-mono">
+                Recipient: {{ selectedWinnerForSms.full_name }} ({{ selectedWinnerForSms.mobile }})
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            @click="isWinnerSmsModalOpen = false"
+            class="w-8 h-8 rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+
+        <!-- Ticket & Winner Badge -->
+        <div class="p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 text-xs font-mono grid grid-cols-2 gap-2">
+          <div>
+            <span class="text-zinc-500 text-[10px] block uppercase">Ticket Pass Number</span>
+            <span class="text-amber-400 font-bold text-sm block">{{ selectedWinnerForSms.ticket_number }}</span>
+          </div>
+          <div>
+            <span class="text-zinc-500 text-[10px] block uppercase">Winner Status</span>
+            <span :class="selectedWinnerForSms.is_winner ? 'text-emerald-400 font-bold' : 'text-zinc-400'">
+              {{ selectedWinnerForSms.is_winner ? '🏆 Verified Draw Winner' : 'Audience Participant' }}
+            </span>
+          </div>
+          <div v-if="selectedWinnerForSms.sms_sent_at" class="col-span-2 text-emerald-400 text-[11px] flex items-center gap-1.5 pt-1 border-t border-zinc-800">
+            <CheckCircle2 class="w-3.5 h-3.5" />
+            <span>Previous SMS sent at: {{ new Date(selectedWinnerForSms.sms_sent_at).toLocaleString('en-GB') }}</span>
+          </div>
+        </div>
+
+        <!-- Language Preset Switcher -->
+        <div class="space-y-1.5">
+          <label class="text-[11px] font-mono font-bold text-zinc-300 uppercase tracking-wider block">Language Template</label>
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <button
+              type="button"
+              @click="setWinnerSmsTemplate('ar')"
+              :class="['p-2 rounded-xl border text-center transition-all font-semibold cursor-pointer', winnerSmsLang === 'ar' ? 'bg-red-950 border-red-600 text-red-300 shadow-md' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white']"
+            >
+              Arabic Template (العربية)
+            </button>
+            <button
+              type="button"
+              @click="setWinnerSmsTemplate('en')"
+              :class="['p-2 rounded-xl border text-center transition-all font-semibold cursor-pointer', winnerSmsLang === 'en' ? 'bg-red-950 border-red-600 text-red-300 shadow-md' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white']"
+            >
+              English Template
+            </button>
+          </div>
+        </div>
+
+        <!-- Message Textarea -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400">
+            <span>SMS Content (SMSGlobal Gateway)</span>
+            <span class="text-zinc-500">{{ winnerSmsMessage.length }} chars</span>
+          </div>
+          <textarea
+            v-model="winnerSmsMessage"
+            rows="4"
+            :dir="winnerSmsLang === 'ar' ? 'rtl' : 'ltr'"
+            class="w-full rounded-xl bg-zinc-900 border border-zinc-800 p-3 text-xs text-white focus:outline-none focus:border-red-500 font-sans leading-relaxed resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Feedback Status -->
+        <div v-if="winnerSmsFeedback" :class="['p-3 rounded-xl text-xs font-mono flex items-center gap-2', winnerSmsFeedback.type === 'success' ? 'bg-emerald-950/60 border border-emerald-700/60 text-emerald-200' : 'bg-red-950/60 border border-red-700/60 text-red-200']">
+          <CheckCircle2 v-if="winnerSmsFeedback.type === 'success'" class="w-4 h-4 text-emerald-400 shrink-0" />
+          <AlertCircle v-else class="w-4 h-4 text-red-400 shrink-0" />
+          <span>{{ winnerSmsFeedback.text }}</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-3 pt-2">
+          <button
+            type="button"
+            @click="isWinnerSmsModalOpen = false"
+            class="flex-1 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white text-xs font-mono uppercase transition cursor-pointer"
+          >
+            Close
+          </button>
+
+          <button
+            type="button"
+            :disabled="isSendingWinnerSms || !winnerSmsMessage.trim()"
+            @click="handleSendWinnerSms"
+            class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-red-600 hover:brightness-110 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-red-950/60 transition disabled:opacity-50 cursor-pointer"
+          >
+            <Send class="w-3.5 h-3.5" />
+            <span>{{ isSendingWinnerSms ? 'Dispatching SMS...' : 'Dispatch SMS' }}</span>
           </button>
         </div>
       </div>

@@ -16,7 +16,8 @@ import {
   Users, 
   Ticket,
   Clock,
-  X
+  X,
+  Send
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -182,6 +183,27 @@ const triggerCelebrationConfetti = () => {
   })();
 };
 
+// Modal Winner SMS Dispatch State
+const isSendingModalSms = ref(false);
+const modalSmsSent = ref(false);
+
+const sendModalWinnerSms = async () => {
+  if (!selectedWinner.value || isSendingModalSms.value) return;
+  isSendingModalSms.value = true;
+  try {
+    const res = await window.axios.post(`/api/hammer-challenge/raffle/${selectedWinner.value.id}/send-sms`);
+    if (res.data.success) {
+      modalSmsSent.value = true;
+    } else {
+      alert(res.data.message || 'Failed to dispatch SMS.');
+    }
+  } catch (err) {
+    alert(err.response?.data?.message || 'Error dispatching SMS.');
+  } finally {
+    isSendingModalSms.value = false;
+  }
+};
+
 // Start 10-Second Live Raffle Draw
 const startRaffleDraw = async () => {
   initAudio();
@@ -198,6 +220,7 @@ const startRaffleDraw = async () => {
   countdownNumber.value = 10;
   showWinnerModal.value = false;
   selectedWinner.value = null;
+  modalSmsSent.value = false;
 
   // Pre-fetch or lock the winning participant from the server
   let determinedWinner = null;
@@ -661,6 +684,20 @@ onUnmounted(() => {
 
         <!-- Action Controls Inside Modal -->
         <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-zinc-800">
+          <button
+            type="button"
+            :disabled="isSendingModalSms || modalSmsSent"
+            @click="sendModalWinnerSms"
+            class="w-full sm:w-auto px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-wider transition shadow-xl flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-75"
+            :class="modalSmsSent 
+              ? 'bg-emerald-950 border border-emerald-500 text-emerald-300' 
+              : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white shadow-emerald-950/80'"
+          >
+            <CheckCircle2 v-if="modalSmsSent" class="w-4 h-4 text-emerald-400" />
+            <Send v-else class="w-4 h-4" />
+            <span>{{ modalSmsSent ? 'Winner SMS Delivered ✓' : (isSendingModalSms ? 'Dispatching SMS...' : 'Dispatch Winner SMS 📱') }}</span>
+          </button>
+
           <button
             type="button"
             @click="showWinnerModal = false"

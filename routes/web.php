@@ -81,6 +81,7 @@ Route::get('/api/hammer-challenge/audience/confirmation/{token}', [HammerChallen
 Route::get('/api/hammer-challenge/raffle/participants', [HammerChallengeController::class, 'getRaffleParticipants'])->name('api.hammer-challenge.raffle.participants');
 Route::post('/api/hammer-challenge/raffle/draw', [HammerChallengeController::class, 'drawRaffleWinner'])->name('api.hammer-challenge.raffle.draw');
 Route::post('/api/hammer-challenge/raffle/reset', [HammerChallengeController::class, 'resetRaffleWinners'])->name('api.hammer-challenge.raffle.reset');
+Route::post('/api/hammer-challenge/raffle/{audience}/send-sms', [HammerChallengeController::class, 'sendRaffleWinnerSms'])->name('api.hammer-challenge.raffle.send-sms');
 
 // Booking Engine
 Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
@@ -116,6 +117,7 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/hammer-challenge/{registration}/status', [DashboardController::class, 'updateHammerRegistrationStatus'])->name('dashboard.hammer-challenge.status');
         Route::get('/hammer-challenge/export', [DashboardController::class, 'exportHammerRegistrations'])->name('dashboard.hammer-challenge.export');
         Route::patch('/hammer-challenge/audience/{audience}/status', [DashboardController::class, 'updateHammerAudienceStatus'])->name('dashboard.hammer-challenge.audience.status');
+        Route::post('/hammer-challenge/audience/{audience}/send-sms', [DashboardController::class, 'sendHammerWinnerSms'])->name('dashboard.hammer-challenge.audience.send-sms');
         Route::get('/hammer-challenge/audience/export', [DashboardController::class, 'exportHammerAudience'])->name('dashboard.hammer-challenge.audience.export');
         Route::post('/change-password', [DashboardController::class, 'changePassword'])->name('dashboard.password.change');
         Route::post('/users/{user}/reset-password', [DashboardController::class, 'resetUserPassword'])->name('dashboard.users.reset-password');
