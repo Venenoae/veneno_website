@@ -29,20 +29,8 @@ Route::get('/{locale}/adihex/display', [AdihexController::class, 'display'])
 // Hammer Challenge 2026 local event flow
 Route::get('/hammer-challenge', [HammerChallengeController::class, 'index'])->name('hammer-challenge.index');
 Route::get('/hammer-challenge/register', [HammerChallengeController::class, 'index'])->name('hammer-challenge.register');
-Route::get('/hammer-challenge/display', [HammerChallengeController::class, 'display'])->name('hammer-challenge.display');
-Route::get('/hammer-challenge/screen', [HammerChallengeController::class, 'display'])->name('hammer-challenge.screen');
 Route::get('/hammer-challenge/terms', [HammerChallengeController::class, 'terms'])->name('hammer-challenge.terms');
 Route::get('/hammer-challenge/confirmation', [HammerChallengeController::class, 'confirmation'])->name('hammer-challenge.confirmation');
-Route::get('/{locale}/hammer-challenge', [HammerChallengeController::class, 'index'])
-    ->where('locale', 'en|ar');
-Route::get('/{locale}/hammer-challenge/register', [HammerChallengeController::class, 'index'])
-    ->where('locale', 'en|ar');
-Route::get('/{locale}/hammer-challenge/display', [HammerChallengeController::class, 'display'])
-    ->where('locale', 'en|ar');
-Route::get('/{locale}/hammer-challenge/screen', [HammerChallengeController::class, 'display'])
-    ->where('locale', 'en|ar');
-Route::get('/{locale}/hammer-challenge/terms', [HammerChallengeController::class, 'terms'])
-    ->where('locale', 'en|ar');
 
 // Multilingual URL prefix fallbacks (en | ar)
 Route::get('/{locale}', [StorefrontController::class, 'home'])
