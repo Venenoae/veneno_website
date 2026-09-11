@@ -574,6 +574,16 @@ const handleLogout = () => {
             </a>
 
             <a
+              href="/hammer-challenge/display"
+              target="_blank"
+              class="px-4 py-2.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-amber-500/40 text-amber-300 hover:text-amber-200 text-xs font-mono font-bold flex items-center gap-2 transition-all shadow-sm"
+              title="Open Big Screen QR Code Display for Hammer Challenge Audience"
+            >
+              <Trophy class="w-3.5 h-3.5 text-amber-400" />
+              <span class="hidden sm:inline">Hammer Screen</span>
+            </a>
+
+            <a
               href="/adihex/display"
               target="_blank"
               class="px-4 py-2.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white text-xs font-mono font-bold flex items-center gap-2 transition-all shadow-sm"

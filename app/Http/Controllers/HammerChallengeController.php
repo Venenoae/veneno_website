@@ -23,6 +23,13 @@ class HammerChallengeController extends Controller
         return Inertia::render('HammerChallenge/Terms');
     }
 
+    public function display(Request $request): Response
+    {
+        return Inertia::render('HammerChallenge/Display', [
+            'targetUrl' => url('/hammer-challenge/register'),
+        ]);
+    }
+
     public function confirmation(): Response
     {
         return Inertia::render('HammerChallenge/Confirmation');
@@ -32,48 +39,39 @@ class HammerChallengeController extends Controller
     {
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'min:2', 'max:120'],
-            'date_of_birth' => ['required', 'date_format:Y-m-d', 'before:today'],
-            'mobile' => ['required', 'string', 'regex:/^\\+?[0-9\\s().-]{7,20}$/', 'max:30'],
-            'email' => ['required', 'email:rfc', 'max:255'],
-            'emergency_contact_name' => ['required', 'string', 'min:2', 'max:120'],
-            'emergency_contact_number' => ['required', 'string', 'regex:/^\\+?[0-9\\s().-]{7,20}$/', 'max:30'],
+            'mobile' => ['required', 'string', 'regex:/^\+?[0-9\s().-]{7,20}$/', 'max:30'],
+            'email' => ['nullable', 'email:rfc', 'max:255'],
             'terms_accepted' => ['accepted'],
         ]);
 
-        $validated['email'] = strtolower(trim($validated['email']));
-        $validated['mobile'] = $this->normalizePhone($validated['mobile']);
-        $validated['emergency_contact_number'] = trim($validated['emergency_contact_number']);
-        $validated['age_declaration'] = true;
-        $validated['health_declaration'] = true;
-        $validated['challenge_declaration'] = true;
-        $validated['voluntary_participation'] = true;
-        $validated['media_consent'] = true;
+        $fullName = trim($validated['full_name']);
+        $mobile = $this->normalizePhone($validated['mobile']);
+        $email = !empty($validated['email']) ? strtolower(trim($validated['email'])) : null;
 
-        $dateOfBirth = Carbon::createFromFormat('Y-m-d', $validated['date_of_birth'])->startOfDay();
-        $age = $dateOfBirth->age;
-
-        if ($age < 18) {
-            return response()->json([
-                'message' => 'Participants must be at least 18 years old.',
-                'errors' => ['date_of_birth' => ['Participants must be at least 18 years old.']],
-            ], 422);
+        // Check if mobile or non-null email already registered
+        $query = HammerChallengeRegistration::query()->where('mobile', $mobile);
+        if ($email) {
+            $query->orWhere('email', $email);
         }
 
-        if (HammerChallengeRegistration::query()
-            ->where('mobile', $validated['mobile'])
-            ->orWhere('email', $validated['email'])
-            ->exists()) {
+        if ($query->exists()) {
             return response()->json([
                 'message' => 'This mobile number or email address has already been registered.',
                 'errors' => ['registration' => ['This mobile number or email address has already been registered.']],
             ], 409);
         }
 
-        $registration = DB::transaction(function () use ($validated, $dateOfBirth, $age, $request) {
+        $registration = DB::transaction(function () use ($fullName, $mobile, $email, $request) {
             $registration = HammerChallengeRegistration::create([
-                ...$validated,
-                'date_of_birth' => $dateOfBirth->toDateString(),
-                'age' => $age,
+                'full_name' => $fullName,
+                'mobile' => $mobile,
+                'email' => $email,
+                'age_declaration' => true,
+                'health_declaration' => true,
+                'challenge_declaration' => true,
+                'voluntary_participation' => true,
+                'terms_accepted' => true,
+                'media_consent' => true,
                 'registration_number' => 'VHC-' . strtoupper(Str::random(16)),
                 'confirmation_token' => Str::random(64),
                 'ip_address' => $request->ip(),
