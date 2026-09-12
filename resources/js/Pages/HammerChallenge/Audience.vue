@@ -266,17 +266,11 @@ const handleAudienceSubmit = async () => {
             />
           </div>
 
-          <!-- Strict Monolingual Headline & Context -->
-          <div class="text-center space-y-2">
+          <!-- Strict Monolingual Headline -->
+          <div class="text-center">
             <h1 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight font-display">
               {{ isRTL ? 'هل استمتعت بزيارتك لمركز فينينو للعناية بالسيارات؟' : 'Enjoyed your visit at Veneno Auto Care Center?' }}
             </h1>
-            <p class="text-xs sm:text-sm text-zinc-300 max-w-md mx-auto leading-relaxed">
-              {{ isRTL 
-                ? 'شارك تجربتك بتقييم 5 نجوم على Google وادخل سحب الجمهور الحصري للفوز بجوائز مميزة وقسائم حصرية!' 
-                : 'Share your 5-star experience on Google to enter the exclusive Audience Raffle for valuable prizes and vouchers!' 
-              }}
-            </p>
           </div>
 
           <!-- Instruction Steps Card with Electric Lime Accent -->
