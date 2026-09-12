@@ -222,14 +222,14 @@ onUnmounted(() => {
         />
       </div>
 
-      <!-- Main Exhibition Title: SCAN • REVIEW • WIN -->
-      <div class="space-y-1">
+      <!-- Main Exhibition Title: SCAN • REVIEW • WIN (Dual-Language Matching Gradients) -->
+      <div class="space-y-1 sm:space-y-2">
         <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-white to-lime-400 drop-shadow-2xl font-display">
           SCAN • REVIEW • WIN
         </h1>
-        <p class="text-lg sm:text-2xl font-bold text-zinc-200 tracking-wide font-display">
+        <h2 dir="rtl" class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-normal text-transparent bg-clip-text bg-gradient-to-l from-red-500 via-white to-lime-400 drop-shadow-2xl font-display">
           امسح • قيّم • اربح
-        </p>
+        </h2>
       </div>
     </header>
 
