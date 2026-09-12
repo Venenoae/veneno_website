@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ ($lead->locale ?? 'en') === 'ar' ? 'فينينو للعناية بالسيارات — قسيمة الفائز في أديهيكس 2026' : 'Veneno Auto Care — ADIHEX 2026 Winner Voucher' }}</title>
+  <title>{{ ($lead->locale ?? 'en') === 'ar' ? 'مركز فينينو للعناية بالسيارات — قسيمة الفائز في أديهيكس 2026' : 'Veneno Auto Care Center — ADIHEX 2026 Winner Voucher' }}</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #09090b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f4f4f5;">
   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #09090b; padding: 30px 10px;">
@@ -19,7 +19,7 @@
                 <tr>
                   <td align="center">
                     <h1 style="margin: 0; font-size: 22px; font-weight: 900; color: #ef4444; letter-spacing: 2px; text-transform: uppercase;">
-                      {{ ($lead->locale ?? 'en') === 'ar' ? 'فينينو للعناية بالسيارات' : 'VENENO AUTO CARE' }}
+                      {{ ($lead->locale ?? 'en') === 'ar' ? 'مركز فينينو للعناية بالسيارات' : 'VENENO AUTO CARE CENTER' }}
                     </h1>
                     <p style="margin: 6px 0 0; font-size: 11px; font-weight: 700; color: #c5a059; letter-spacing: 1.5px; text-transform: uppercase;">
                       {{ ($lead->locale ?? 'en') === 'ar' ? 'قسيمة الفائز الرسمية — معرض أديهيكس 2026' : 'OFFICIAL ADIHEX 2026 WINNER VOUCHER' }}
@@ -41,8 +41,8 @@
               
               <p style="margin: 0 0 25px; font-size: 13px; color: #a1a1aa; text-align: center; line-height: 1.6;">
                 {{ $lead->locale === 'ar' 
-                  ? 'تم تأكيد وحفظ جائزتك وتفاصيل مشاركتك في جناح فينينو للعناية بالسيارات في معرض أديهيكس 2026 بنجاح.' 
-                  : 'Your official prize and reservation details at the Veneno Auto Care booth (ADIHEX 2026) have been confirmed and registered.' }}
+                  ? 'تم تأكيد وحفظ جائزتك وتفاصيل مشاركتك في جناح مركز فينينو للعناية بالسيارات في معرض أديهيكس 2026 بنجاح.' 
+                  : 'Your official prize and reservation details at the Veneno Auto Care Center booth (ADIHEX 2026) have been confirmed and registered.' }}
               </p>
 
               <!-- Voucher Code Gold Highlight Box -->

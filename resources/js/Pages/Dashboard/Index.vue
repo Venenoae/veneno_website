@@ -144,24 +144,24 @@ const updateWhatsAppTemplate = (templateType) => {
   if (templateType === 'confirmation') {
     if (isAr) {
       customWhatsAppMessage.value = hasPackage
-        ? `مرحباً ${lead.name}، شكراً لزيارتك جناح فينينو للعناية بالسيارات في معرض أديهيكس 2026!\nنؤكد استلام عربون 500 درهم وحجز باقة "${lead.selected_package_name}".\nكود القسيمة: ${code}\nجائزتك: ${prize}\nيسعدنا التنسيق معك لتحديد موعد حضور سيارتك لمركزنا في مصفح M37، أبوظبي.`
-        : `Hello ${lead.name}, thank you for visiting Veneno Auto Care at ADIHEX 2026!\nWe confirm your AED 500 deposit for "${lead.selected_package_name}".\nVoucher Code: ${code}\nWon Prize: ${prize}\nWhen would you like to schedule your workshop visit in Musaffah M37, Abu Dhabi?`;
+        ? `مرحباً ${lead.name}، شكراً لزيارتك جناح مركز فينينو للعناية بالسيارات في معرض أديهيكس 2026!\nنؤكد استلام عربون 500 درهم وحجز باقة "${lead.selected_package_name}".\nكود القسيمة: ${code}\nجائزتك: ${prize}\nيسعدنا التنسيق معك لتحديد موعد حضور سيارتك لمركزنا في مصفح M37، أبوظبي.`
+        : `Hello ${lead.name}, thank you for visiting Veneno Auto Care Center at ADIHEX 2026!\nWe confirm your AED 500 deposit for "${lead.selected_package_name}".\nVoucher Code: ${code}\nWon Prize: ${prize}\nWhen would you like to schedule your workshop visit in Musaffah M37, Abu Dhabi?`;
     } else {
       customWhatsAppMessage.value = hasPackage
-        ? `Hello ${lead.name}, thank you for visiting Veneno Auto Care at ADIHEX 2026!\nWe confirm your AED 500 deposit for "${lead.selected_package_name}".\nVoucher Code: ${code}\nWon Prize: ${prize}\nWhen would you like to schedule your workshop visit in Musaffah M37, Abu Dhabi?`
-        : `Hello ${lead.name}, thank you for visiting Veneno Auto Care at ADIHEX 2026!\nWe confirm your won prize: "${prize}".\nVoucher Code: ${code}\nValid for 60 days. When would you like to bring your vehicle in?`;
+        ? `Hello ${lead.name}, thank you for visiting Veneno Auto Care Center at ADIHEX 2026!\nWe confirm your AED 500 deposit for "${lead.selected_package_name}".\nVoucher Code: ${code}\nWon Prize: ${prize}\nWhen would you like to schedule your workshop visit in Musaffah M37, Abu Dhabi?`
+        : `Hello ${lead.name}, thank you for visiting Veneno Auto Care Center at ADIHEX 2026!\nWe confirm your won prize: "${prize}".\nVoucher Code: ${code}\nValid for 60 days. When would you like to bring your vehicle in?`;
     }
   } else if (templateType === 'appointment') {
     if (isAr) {
       customWhatsAppMessage.value = `أهلاً بك ${lead.name}، نود التنسيق معك بخصوص موعد زيارتك لمركز فينينو للعناية بالسيارات لاستخدام قسيمتك (${code}).\nيرجى تزويدنا بنوع السيارة واليوم المناسب لك لنقوم بتجهيز مسار الخدمة الخاص بك.`;
     } else {
-      customWhatsAppMessage.value = `Dear ${lead.name}, we would like to coordinate your upcoming appointment at Veneno Auto Care for voucher (${code}).\nPlease share your vehicle model and preferred day so our team can prepare your dedicated service bay.`;
+      customWhatsAppMessage.value = `Dear ${lead.name}, we would like to coordinate your upcoming appointment at Veneno Auto Care Center for voucher (${code}).\nPlease share your vehicle model and preferred day so our team can prepare your dedicated service bay.`;
     }
   } else if (templateType === 'exclusive_offer') {
     if (isAr) {
-      customWhatsAppMessage.value = `مرحباً ${lead.name}، يسر فريق فينينو تقديم ترقية حصرية خاصة لزوار أديهيكس على باقات حماية النانو سيراميك وPPF بجانب جائزتك (${prize}). هل ترغب بالحصول على استشارة فنية مخصصة لسيارتك؟`;
+      customWhatsAppMessage.value = `مرحباً ${lead.name}، يسر فريق مركز فينينو للعناية بالسيارات تقديم ترقية حصرية خاصة لزوار أديهيكس على باقات حماية النانو سيراميك وPPF بجانب جائزتك (${prize}). هل ترغب بالحصول على استشارة فنية مخصصة لسيارتك؟`;
     } else {
-      customWhatsAppMessage.value = `Hello ${lead.name}, Veneno Auto Care is pleased to offer you an exclusive ADIHEX upgrade on our Nano-Ceramic and PPF protection packages alongside your prize (${prize}). Would you like a complimentary consultation for your car?`;
+      customWhatsAppMessage.value = `Hello ${lead.name}, Veneno Auto Care Center is pleased to offer you an exclusive ADIHEX upgrade on our Nano-Ceramic and PPF protection packages alongside your prize (${prize}). Would you like a complimentary consultation for your car?`;
     }
   }
 };
@@ -495,7 +495,7 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <Head title="ADIHEX 2026 & Leads Command Center - Veneno Auto Care" />
+  <Head title="ADIHEX 2026 & Leads Command Center - Veneno Auto Care Center" />
 
   <div class="min-h-screen flex flex-col bg-[#070709] text-zinc-100 font-sans selection:bg-red-600 selection:text-white">
     <Navbar />
@@ -1462,7 +1462,7 @@ const handleLogout = () => {
 
                 <!-- WhatsApp -->
                 <a
-                  :href="`https://wa.me/${inq.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hello ' + inq.customer_name + ', thank you for contacting Veneno Auto Care regarding your quote request for ' + inq.service_requested + '. How may we assist you?')}`"
+                  :href="`https://wa.me/${inq.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hello ' + inq.customer_name + ', thank you for contacting Veneno Auto Care Center regarding your quote request for ' + inq.service_requested + '. How may we assist you?')}`"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition-all"

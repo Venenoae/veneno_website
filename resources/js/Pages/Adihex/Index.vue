@@ -227,7 +227,7 @@ const t = computed(() => {
     adnecTag: isAr ? 'أديهيكس 2026 • أدنيك أبوظبي' : 'ADIHEX 2026 • ADNEC',
 
     // Step 1
-    s1_tag: isAr ? 'مرحباً بكم في جناح فينينو للعناية بالسيارات' : 'WELCOME TO VENENO AUTO CARE × ADIHEX 2026',
+    s1_tag: isAr ? 'مرحباً بكم في جناح مركز فينينو للعناية بالسيارات' : 'WELCOME TO VENENO AUTO CARE CENTER × ADIHEX 2026',
     s1_title1: isAr ? 'امسح.' : 'SCAN.',
     s1_title2: isAr ? 'أدِر.' : 'SPIN.',
     s1_title3: isAr ? 'اربح' : 'WIN',
@@ -878,7 +878,7 @@ const downloadPrizeCertificate = () => {
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ef4444';
     ctx.font = isAr ? '900 50px "Cairo", "Segoe UI", sans-serif' : '900 50px "Outfit", sans-serif';
-    ctx.fillText(isAr ? 'فينينو للعناية بالسيارات' : 'VENENO AUTO CARE CENTER', width / 2, 170);
+    ctx.fillText(isAr ? 'مركز فينينو للعناية بالسيارات' : 'VENENO AUTO CARE CENTER', width / 2, 170);
 
     // 5. Header Gold Subtitle
     ctx.fillStyle = '#c5a059';

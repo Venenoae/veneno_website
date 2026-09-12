@@ -44,7 +44,7 @@ const updateJobStage = (booking, newStage) => {
 </script>
 
 <template>
-  <Head title="Technician Bay Board - Veneno Auto Care" />
+  <Head title="Technician Bay Board - Veneno Auto Care Center" />
 
   <div class="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 font-sans selection:bg-red-600 selection:text-white">
     <Navbar />

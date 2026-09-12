@@ -69,13 +69,13 @@ const openGoogleMaps = () => {
         <div class="w-10 h-10 rounded-xl overflow-hidden border border-red-500/50 bg-red-600 flex items-center justify-center p-1.5 shadow-lg shadow-red-950/50 group-hover:scale-105 transition">
           <img 
             src="/images/veneno-emblem.png" 
-            alt="Veneno Auto Care" 
+            alt="Veneno Auto Care Center" 
             class="w-full h-full object-contain rounded-lg"
           />
         </div>
         <div>
           <span class="text-xs font-black tracking-widest text-white uppercase font-display block">
-            {{ isRTL ? 'مركز فينينو للعناية بالسيارات' : 'VENENO AUTO CARE' }}
+            {{ isRTL ? 'مركز فينينو للعناية بالسيارات' : 'VENENO AUTO CARE CENTER' }}
           </span>
           <span class="block text-[10px] text-zinc-400 font-mono">
             {{ isRTL ? 'مصفح M37، أبوظبي' : 'Musaffah M37, Abu Dhabi' }}

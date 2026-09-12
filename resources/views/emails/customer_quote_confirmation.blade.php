@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quote Request Received — Veneno Auto Care</title>
+  <title>Quote Request Received — Veneno Auto Care Center</title>
   <style>
     body {
       margin: 0;
@@ -128,7 +128,7 @@
   <div class="wrapper">
     <div class="container">
       <div class="header">
-        <div class="brand">VENENO AUTO CARE</div>
+        <div class="brand">VENENO AUTO CARE CENTER</div>
         <div class="badge">Official 3M & GYEON Certified Studio</div>
         <h1 class="title">Thank You For Reaching Out</h1>
       </div>

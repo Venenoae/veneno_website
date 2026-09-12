@@ -268,7 +268,7 @@ onUnmounted(() => {
                   <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                   <span class="text-red-400 font-bold uppercase tracking-wider">Abu Dhabi</span>
                   <span class="text-zinc-600">|</span>
-                  <span class="line-clamp-1">Veneno Auto Care — Main Branch</span>
+                  <span class="line-clamp-1">Veneno Auto Care Center — Main Branch</span>
                 </div>
               </div>
             </div>
@@ -476,7 +476,7 @@ onUnmounted(() => {
               <!-- Dual Brand Logos Banner -->
               <div class="flex items-center justify-center lg:justify-start rtl:lg:justify-start gap-3 sm:gap-4 pt-1">
                 <div class="flex items-center gap-2.5 sm:gap-3 p-2.5 rounded-2xl bg-zinc-950/80 border border-zinc-800 shadow-lg">
-                  <img src="/images/adihex/veneno-header-icon.png" alt="Veneno Auto Care" class="h-9 w-9 sm:h-11 sm:w-11 object-contain rounded-xl" />
+                  <img src="/images/adihex/veneno-header-icon.png" alt="Veneno Auto Care Center" class="h-9 w-9 sm:h-11 sm:w-11 object-contain rounded-xl" />
                   <div class="text-start rtl:text-right pr-2 rtl:pr-0 rtl:pl-2">
                     <div class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider font-display">VENENO</div>
                     <div class="text-[10px] text-zinc-400 font-mono">Auto Care Center</div>

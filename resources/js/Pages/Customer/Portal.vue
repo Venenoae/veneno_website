@@ -55,7 +55,7 @@ const isStageCompleted = (stageName, currentStatus) => {
 </script>
 
 <template>
-  <Head title="VIP Client Portal & Garage - Veneno Auto Care" />
+  <Head title="VIP Client Portal & Garage - Veneno Auto Care Center" />
 
   <div class="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 font-sans selection:bg-red-600 selection:text-white">
     <Navbar

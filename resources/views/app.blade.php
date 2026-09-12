@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title inertia>{{ config('app.name', 'Veneno Auto Care') }}</title>
+        <title inertia>{{ config('app.name', 'Veneno Auto Care Center') }}</title>
         
         <!-- Canonical URL -->
         <link rel="canonical" href="{{ url()->current() }}">
@@ -32,7 +32,7 @@
         <meta name="theme-color" content="#09090b">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="Veneno Auto Care">
+        <meta name="apple-mobile-web-app-title" content="Veneno Auto Care Center">
 
         <!-- Primary Meta Tags & Open Graph (Social Preview / WhatsApp / Facebook / LinkedIn) -->
         <meta name="title" content="Veneno Auto Care Center — The Ultimate Art of Care in UAE">

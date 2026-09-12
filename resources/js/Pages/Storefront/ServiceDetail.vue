@@ -46,13 +46,13 @@ const isQuoteModalOpen = ref(false);
 
 <template>
   <Head>
-    <title>{{ `${activeService.name} — Veneno Auto Care Abu Dhabi & UAE` }}</title>
+    <title>{{ `${activeService.name} — Veneno Auto Care Center Abu Dhabi & UAE` }}</title>
     <meta head-key="description" name="description" :content="activeService.description" />
-    <meta head-key="og:title" property="og:title" :content="`${activeService.name} — Veneno Auto Care`" />
+    <meta head-key="og:title" property="og:title" :content="`${activeService.name} — Veneno Auto Care Center`" />
     <meta head-key="og:description" property="og:description" :content="activeService.description" />
     <meta head-key="og:image" property="og:image" :content="activeService.image" />
     <meta head-key="og:image:secure_url" property="og:image:secure_url" :content="activeService.image" />
-    <meta head-key="twitter:title" name="twitter:title" :content="`${activeService.name} — Veneno Auto Care`" />
+    <meta head-key="twitter:title" name="twitter:title" :content="`${activeService.name} — Veneno Auto Care Center`" />
     <meta head-key="twitter:description" name="twitter:description" :content="activeService.description" />
     <meta head-key="twitter:image" name="twitter:image" :content="activeService.image" />
   </Head>

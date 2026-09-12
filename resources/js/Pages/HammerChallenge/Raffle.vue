@@ -422,7 +422,7 @@ onUnmounted(() => {
       <div class="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-zinc-900/90 border border-red-500/40 shadow-xl backdrop-blur-md">
         <div class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></div>
         <span class="text-xs font-mono font-bold tracking-[0.25em] text-white uppercase">
-          VENENO AUTO CARE • STAGE RAFFLE ENGINE
+          VENENO AUTO CARE CENTER • STAGE RAFFLE ENGINE
         </span>
       </div>
 

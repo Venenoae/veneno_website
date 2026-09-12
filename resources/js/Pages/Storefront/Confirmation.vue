@@ -14,7 +14,7 @@ const printReceipt = () => {
 </script>
 
 <template>
-  <Head :title="`Booking Confirmed ${booking.booking_code} - Veneno Auto Care`" />
+  <Head :title="`Booking Confirmed ${booking.booking_code} - Veneno Auto Care Center`" />
 
   <div class="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 font-sans">
     <Navbar />
@@ -36,7 +36,7 @@ const printReceipt = () => {
       <div class="glass-panel p-8 rounded-3xl border border-zinc-800 text-left space-y-6 font-mono text-xs shadow-2xl">
         <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
           <div>
-            <div class="text-base font-bold text-white">VENENO AUTO CARE RECEIPT</div>
+            <div class="text-base font-bold text-white">VENENO AUTO CARE CENTER RECEIPT</div>
             <div class="text-zinc-500 text-[10px]">Invoice Ref: {{ booking.payment?.receipt_number || 'VEN-REC-9021' }}</div>
           </div>
           <button
