@@ -39,8 +39,7 @@ onMounted(async () => {
         <p class="mt-6 text-xs font-mono uppercase tracking-[0.25em] text-lime-400">Registration confirmed</p>
         <h1 class="mt-3 font-display text-4xl font-black uppercase text-white sm:text-5xl">You're Registered!</h1>
         <p class="mt-3 text-lg text-zinc-300">تم تسجيلك بنجاح! 🔥</p>
-        <p class="mt-2 text-sm text-zinc-400">Veneno Hammer Challenge - The Final</p>
-        <div class="mt-8 space-y-2 text-sm text-zinc-300"><p>Saturday, 12 September 2026</p><p class="flex justify-center gap-2"><MapPin class="h-4 w-4 text-red-400" /> Veneno Auto Care Center - Mussafah</p><p>Check-in: 7:30 PM</p><p>Starts: 8:00 PM</p></div>
+        <div class="mt-8 space-y-2 text-sm text-zinc-300"><p>Saturday, 12 September 2026</p><p class="flex justify-center gap-2"><MapPin class="h-4 w-4 text-red-400" /> Veneno Auto Care Center - Mussafah</p><p>Event Timing: 5:00 PM – 10:00 PM</p></div>
         <div class="mt-8 rounded-2xl border border-red-500/50 bg-gradient-to-b from-red-950/40 to-zinc-950 p-5 shadow-lg shadow-red-950/20"><p class="text-xs uppercase tracking-[0.2em] text-lime-400 font-bold">Registration number</p><p class="mt-3 text-4xl font-black tracking-[0.18em] text-white sm:text-5xl">{{ registration.registration_number }}</p><p class="mt-2 text-[10px] font-mono uppercase tracking-widest text-zinc-400">Keep this number for event check-in</p></div>
         <p class="mt-8 text-sm leading-relaxed text-zinc-300">Bring valid ID and suitable sports clothing and athletic footwear.</p>
         <p class="mt-5 text-lg font-bold text-white">See you at the challenge 💪🔥</p>

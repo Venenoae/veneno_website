@@ -121,8 +121,7 @@ const submit = async () => {
             <div class="mt-6 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 sm:text-base">
               <p><span class="mr-2 text-[10px] font-mono uppercase tracking-widest text-zinc-500">{{ t('hammer.registration.dateLabel') }}</span>{{ t('hammer.date') }}</p>
               <p class="flex items-start gap-2"><MapPin class="mt-0.5 h-4 w-4 shrink-0 text-red-400" /> {{ t('hammer.registration.location') }}</p>
-              <p>{{ t('hammer.registration.checkInLabel') }} <strong class="text-white">7:30 PM</strong></p>
-              <p>{{ t('hammer.registration.startsLabel') }} <strong class="text-white">8:00 PM</strong></p>
+              <p class="sm:col-span-2">{{ t('hammer.registration.checkInLabel') }} <strong class="text-white font-mono">5:00 PM – 10:00 PM</strong></p>
             </div>
             <div class="mt-7 flex flex-wrap items-center gap-3">
               <Link href="#registration-form" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-red-600 px-5 py-3 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-red-950/50 transition hover:brightness-110">{{ t('hammer.registration.registerNow') }} <ArrowRight class="h-4 w-4" /></Link>

@@ -54,10 +54,10 @@ const openGoogleMaps = () => {
 </script>
 
 <template>
-  <Head :title="isRTL ? 'تذكرتك الرسمية • تحدي مطرقة فينينو' : 'Your Official Pass • Veneno Hammer Challenge'" />
+  <Head :title="isRTL ? 'بطاقة دخول السحب ورقم التذكرة • تحدي مطرقة فينينو' : 'Raffle Entry & Official Pass • Veneno Hammer Challenge'" />
 
   <div 
-    :dir="isRTL ? 'rtl' : 'ltr'"
+    :dir="isRTL ? 'rtl' : 'ltr'" 
     class="relative min-h-screen overflow-x-hidden bg-[#070709] text-zinc-100 font-sans px-4 py-6 flex flex-col justify-between"
   >
     <!-- Magma & Volcanic Red Ambience Glows -->
@@ -92,7 +92,7 @@ const openGoogleMaps = () => {
       <!-- Loading State -->
       <div v-if="isLoading" class="text-center py-12 text-zinc-400 text-sm">
         <div class="w-8 h-8 mx-auto mb-3 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-        {{ isRTL ? 'جاري تحميل التذكرة...' : 'Loading Audience Ticket...' }}
+        {{ isRTL ? 'جاري تحميل التذكرة...' : 'Loading Raffle Ticket...' }}
       </div>
 
       <!-- Error State -->
@@ -121,14 +121,14 @@ const openGoogleMaps = () => {
         </div>
 
         <p class="mt-5 text-xs font-mono uppercase tracking-[0.25em] text-red-400 font-bold">
-          {{ isRTL ? 'تصريح دخول رسمي للجمهور' : 'Official Event Pass' }}
+          {{ isRTL ? 'بطاقة دخول السحب ورقم التذكرة' : 'Official Raffle Entry & Audience Pass' }}
         </p>
         
         <h1 class="mt-2 font-display text-3xl sm:text-4xl font-black uppercase text-white tracking-tight">
-          {{ isRTL ? 'تم تأكيد تسجيلك!' : "You're Registered!" }}
+          {{ isRTL ? 'تم تأكيد دخولك السحب!' : "You're Entered in the Raffle!" }}
         </h1>
         <p class="text-sm sm:text-base font-bold text-zinc-300 mt-1">
-          {{ isRTL ? 'تم إصدار تذكرة الحضور المجانية بنجاح' : 'Your Free Audience VIP Pass is Confirmed' }}
+          {{ isRTL ? 'تم إصدار رقم تذكرة السحب للمشاركة في جوائز الجمهور' : 'Your Raffle Ticket Number is confirmed for the live prize draw' }}
         </p>
 
         <!-- Ticket Voucher Badge Box with Red & Electric Lime Border -->
@@ -136,16 +136,16 @@ const openGoogleMaps = () => {
           <div class="flex items-center justify-between text-xs font-mono pb-2 border-b border-zinc-800">
             <span class="flex items-center gap-1.5 text-white font-bold">
               <Ticket class="w-3.5 h-3.5 text-red-500" />
-              <span>{{ isRTL ? 'تذكرة الجمهور' : 'Audience Pass' }}</span>
+              <span>{{ isRTL ? 'تذكرة سحب الجمهور' : 'Audience Raffle Ticket' }}</span>
             </span>
             <span class="text-[#a3e635] font-bold font-mono">
-              ● {{ isRTL ? 'فعال' : 'ACTIVE' }}
+              ● {{ isRTL ? 'فعال في السحب' : 'ACTIVE IN RAFFLE' }}
             </span>
           </div>
 
           <div class="py-4">
             <div class="text-[11px] uppercase tracking-[0.2em] text-zinc-400 font-mono">
-              {{ isRTL ? 'رقم التذكرة' : 'Ticket Number' }}
+              {{ isRTL ? 'رقم تذكرة السحب' : 'Raffle Ticket Number' }}
             </div>
             <div class="mt-1 text-3xl sm:text-4xl font-black tracking-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-white to-red-400 font-mono">
               {{ registration.ticket_number }}
@@ -163,7 +163,7 @@ const openGoogleMaps = () => {
           </div>
 
           <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider pt-2 border-t border-zinc-800">
-            {{ isRTL ? 'يرجى إبراز هذه الشاشة عند مدخل الفعالية' : 'Show this digital pass at the venue entrance' }}
+            {{ isRTL ? 'احتفظ برقم التذكرة لإبرازه عند إعلان الفائزين بالجوائز' : 'Keep this ticket number ready for the live raffle prize announcements' }}
           </div>
         </div>
 
@@ -179,11 +179,11 @@ const openGoogleMaps = () => {
           <div class="flex items-center gap-3">
             <Clock class="w-4 h-4 text-red-400 shrink-0" />
             <div>
-              <span class="text-zinc-500 block text-[10px] uppercase font-mono">{{ isRTL ? 'الجدول' : 'Schedule' }}</span>
-              <span class="text-zinc-300">
+              <span class="text-zinc-500 block text-[10px] uppercase font-mono">{{ isRTL ? 'توقيت الفعالية' : 'Event Timing' }}</span>
+              <span class="text-zinc-300 font-bold">
                 {{ isRTL 
-                  ? 'استقبال الجمهور: 7:30 مساءً • انطلاق التحدي: 8:00 مساءً' 
-                  : 'Audience Check-in: 7:30 PM • Challenge Starts: 8:00 PM' 
+                  ? '5:00 مساءً – 10:00 مساءً' 
+                  : '5:00 PM – 10:00 PM' 
                 }}
               </span>
             </div>

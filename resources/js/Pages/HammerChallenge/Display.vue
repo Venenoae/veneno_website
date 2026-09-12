@@ -2,13 +2,18 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import QRCode from 'qrcode';
-import { Camera, Sparkles, MapPin, Clock, Trophy, Flame } from 'lucide-vue-next';
+import { Camera, Sparkles, MapPin, Clock, Trophy, Flame, Maximize2, Minimize2 } from 'lucide-vue-next';
 
 const props = defineProps({
   targetUrl: { type: String, default: 'https://veneno.ae/hammer-challenge/audience' },
 });
 
-// Fullscreen State (Double click anywhere on screen)
+// Fullscreen State with Dedicated Button
+const isFullscreen = ref(false);
+const updateFullscreenState = () => {
+  isFullscreen.value = !!document.fullscreenElement;
+};
+
 const toggleFullscreen = () => {
   if (!document.fullscreenElement) {
     document.documentElement.requestFullscreen().catch(() => {});
@@ -178,6 +183,7 @@ onMounted(() => {
   generateLuxuryQR();
   initParticleCanvas();
   requestWakeLock();
+  document.addEventListener('fullscreenchange', updateFullscreenState);
 });
 
 onUnmounted(() => {
@@ -186,6 +192,7 @@ onUnmounted(() => {
     wakeLock.release().catch(() => {});
     wakeLock = null;
   }
+  document.removeEventListener('fullscreenchange', updateFullscreenState);
 });
 </script>
 
@@ -193,8 +200,7 @@ onUnmounted(() => {
   <Head title="Veneno Hammer Challenge • Audience QR Display Screen" />
 
   <div
-    @dblclick="toggleFullscreen"
-    class="relative w-screen h-screen overflow-hidden bg-[#070709] text-white flex flex-col justify-between select-none font-sans cursor-pointer p-4 sm:p-8"
+    class="relative w-screen h-screen overflow-hidden bg-[#070709] text-white flex flex-col justify-between select-none font-sans p-4 sm:p-8"
   >
     <!-- 60 FPS Particle Canvas Background -->
     <canvas ref="bgCanvasRef" class="absolute inset-0 pointer-events-none z-0"></canvas>
@@ -205,28 +211,14 @@ onUnmounted(() => {
       <div class="absolute -bottom-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-t from-lime-500/15 via-red-950/20 to-transparent blur-3xl"></div>
     </div>
 
-    <!-- Top Header / Official Banner -->
-    <header class="relative z-10 flex flex-col items-center text-center space-y-3 pt-2 sm:pt-4">
-      <!-- Veneno Brand Signature Badge -->
-      <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-zinc-900/80 border border-red-500/40 shadow-xl shadow-black/80 backdrop-blur-md">
-        <div class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></div>
-        <span class="text-xs sm:text-sm font-bold tracking-[0.25em] uppercase text-white font-mono">
-          VENENO AUTO CARE CENTER • ABU DHABI
-        </span>
-      </div>
-
-      <!-- Main Exhibition Title -->
+    <!-- Top Header / Main Exhibition Title -->
+    <header class="relative z-10 flex flex-col items-center text-center space-y-2 pt-2 sm:pt-4">
       <div class="space-y-1">
-        <div class="flex items-center justify-center gap-2 text-lime-400 font-black tracking-widest text-sm uppercase">
-          <Flame class="w-5 h-5 text-red-500 animate-pulse" />
-          <span>LIVE EVENT • AUDIENCE & VISITOR PASS</span>
-          <Flame class="w-5 h-5 text-red-500 animate-pulse" />
-        </div>
         <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-white to-lime-400 drop-shadow-2xl font-display">
           HAMMER CHALLENGE
         </h1>
-        <p class="text-xl sm:text-3xl font-bold text-zinc-200 tracking-wide">
-          تحدي مطرقة فينينو • تصريح حضور الجمهور
+        <p class="text-xl sm:text-3xl font-bold text-zinc-200 tracking-wide font-display">
+          تحدي مطرقة فينينو
         </p>
       </div>
     </header>
@@ -262,16 +254,21 @@ onUnmounted(() => {
             <div class="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_12px_#ef4444] animate-laser pointer-events-none"></div>
           </div>
 
-          <!-- Pass Type Badge Below QR -->
-          <div class="mt-4 text-center space-y-1">
-            <div class="text-sm sm:text-base font-black tracking-wide text-white uppercase flex items-center justify-center gap-2">
-              <Sparkles class="w-4 h-4 text-lime-400" />
-              <span>FREE AUDIENCE & VISITOR TICKET</span>
-              <Sparkles class="w-4 h-4 text-lime-400" />
+          <!-- Slogan & Call to Action Below QR -->
+          <div class="mt-4 text-center space-y-1.5 max-w-sm px-2">
+            <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-lime-500/15 border border-lime-400/40 text-lime-400 text-sm sm:text-base font-black tracking-wide uppercase shadow-lg shadow-lime-950/40">
+              <Sparkles class="w-4 h-4 text-lime-400 animate-pulse" />
+              <span>SCAN • REVIEW • WIN</span>
+              <span class="text-xs opacity-60">|</span>
+              <span class="font-bold">امسح • قيّم • اربح</span>
+              <Sparkles class="w-4 h-4 text-lime-400 animate-pulse" />
             </div>
-            <div class="text-xs sm:text-sm text-lime-400/90 font-medium">
-              احصل على تذكرة الحضور وتصريح الدخول المجاني فوراً
-            </div>
+            <p class="text-xs sm:text-sm font-bold text-white leading-snug">
+              امسح الكود، اكتب تقييمك على Google وادخل السحب على جوائز مميزة!
+            </p>
+            <p class="text-[11px] text-zinc-400 font-medium">
+              Scan the code, write Google review & enter the Raffle to win exciting prizes!
+            </p>
           </div>
         </div>
       </div>
@@ -286,8 +283,8 @@ onUnmounted(() => {
             <Trophy class="w-5 h-5" />
           </div>
           <div>
-            <div class="text-[10px] text-zinc-400 uppercase font-mono tracking-wider">Grand Prize</div>
-            <div class="text-sm font-bold text-white">AED 15,000 Cash</div>
+            <div class="text-[10px] text-zinc-400 uppercase font-mono tracking-wider">Audience Prizes • جوائز الجمهور</div>
+            <div class="text-sm font-bold text-white">Exciting Gifts & Vouchers</div>
           </div>
         </div>
 
@@ -296,8 +293,8 @@ onUnmounted(() => {
             <Clock class="w-5 h-5" />
           </div>
           <div>
-            <div class="text-[10px] text-zinc-400 uppercase font-mono tracking-wider">Audience Check-in</div>
-            <div class="text-sm font-bold text-white">7:30 PM • 12 Sep 2026</div>
+            <div class="text-[10px] text-zinc-400 uppercase font-mono tracking-wider">Event Timing • توقيت الفعالية</div>
+            <div class="text-sm font-bold text-white">5:00 PM – 10:00 PM • 12 Sep 2026</div>
           </div>
         </div>
 
@@ -306,15 +303,27 @@ onUnmounted(() => {
             <MapPin class="w-5 h-5" />
           </div>
           <div>
-            <div class="text-[10px] text-zinc-400 uppercase font-mono tracking-wider">Event Location</div>
+            <div class="text-[10px] text-zinc-400 uppercase font-mono tracking-wider">Event Location • موقع الفعالية</div>
             <div class="text-sm font-bold text-white">Musaffah M37, Abu Dhabi</div>
           </div>
         </div>
       </div>
 
-      <!-- Kiosk Help Footer -->
-      <div class="text-center text-[11px] text-zinc-400 font-mono">
-        Double click / double tap anywhere for borderless Fullscreen • veneno.ae/hammer-challenge/audience
+      <!-- Kiosk Help Footer with Dedicated Fullscreen Button -->
+      <div class="flex items-center justify-between gap-4 pt-1 px-1">
+        <div class="text-left text-[11px] text-zinc-400 font-mono">
+          Official Raffle Platform • veneno.ae/hammer-challenge/audience
+        </div>
+
+        <button
+          type="button"
+          @click="toggleFullscreen"
+          class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 hover:text-white text-xs font-mono font-semibold transition cursor-pointer shadow-md hover:border-red-500/50"
+          :title="isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'"
+        >
+          <component :is="isFullscreen ? Minimize2 : Maximize2" class="w-3.5 h-3.5 text-lime-400" />
+          <span>{{ isFullscreen ? 'Exit Fullscreen' : 'Fullscreen' }}</span>
+        </button>
       </div>
     </footer>
   </div>

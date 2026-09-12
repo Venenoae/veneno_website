@@ -142,7 +142,7 @@ const handleAudienceSubmit = async () => {
 </script>
 
 <template>
-  <Head :title="isRTL ? 'تصريح حضور الجمهور والزوار • تحدي فينينو 2026' : 'Audience & Visitor Pass • Veneno Hammer Challenge 2026'" />
+  <Head :title="isRTL ? 'امسح، قيّم واربح • تحدي فينينو 2026' : 'Scan, Review & Win • Veneno Hammer Challenge 2026'" />
 
   <div 
     :dir="isRTL ? 'rtl' : 'ltr'" 
@@ -179,7 +179,7 @@ const handleAudienceSubmit = async () => {
         <!-- Event Tag Badge -->
         <div class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-bold font-mono shadow-sm">
           <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-          <span>{{ isRTL ? 'تصريح الجمهور' : 'AUDIENCE PASS' }}</span>
+          <span>{{ isRTL ? 'سحب الجمهور' : 'AUDIENCE RAFFLE' }}</span>
         </div>
       </div>
     </header>
@@ -236,7 +236,7 @@ const handleAudienceSubmit = async () => {
               >
                 <span>2</span>
               </div>
-              <span>{{ isRTL ? 'بيانات التذكرة' : 'Visitor Pass' }}</span>
+              <span>{{ isRTL ? 'دخول السحب' : 'Enter Raffle' }}</span>
             </div>
           </div>
         </div>
@@ -282,8 +282,8 @@ const handleAudienceSubmit = async () => {
             </h1>
             <p class="text-xs sm:text-sm text-zinc-300 max-w-md mx-auto leading-relaxed">
               {{ isRTL 
-                ? 'شارك تجربتك بتقييم 5 نجوم على Google لفتح تذكرة حضور الجمهور مجاناً ومشاهدة المنافسات الحية والجوائز الكبرى!' 
-                : 'Share your 5-star experience on Google — it only takes a moment to unlock your Free VIP Audience Entrance Pass!' 
+                ? 'شارك تجربتك بتقييم 5 نجوم على Google وادخل سحب الجمهور الحصري للفوز بجوائز مميزة وقسائم حصرية!' 
+                : 'Share your 5-star experience on Google to enter the exclusive Audience Raffle for valuable prizes and vouchers!' 
               }}
             </p>
           </div>
@@ -292,7 +292,7 @@ const handleAudienceSubmit = async () => {
           <div class="rounded-2xl bg-[#121217] border border-zinc-800 p-4 space-y-2.5 text-xs text-zinc-300 shadow-inner">
             <div class="font-bold text-[#a3e635] text-[11px] uppercase tracking-wider font-mono flex items-center gap-1.5">
               <Sparkles class="w-3.5 h-3.5" />
-              <span>{{ isRTL ? 'خطوات فتح التذكرة المجانية:' : 'Quick 2-Step Unlock:' }}</span>
+              <span>{{ isRTL ? 'خطوات دخول السحب:' : 'How to Enter the Raffle:' }}</span>
             </div>
             
             <div class="flex items-start gap-2.5">
@@ -300,7 +300,7 @@ const handleAudienceSubmit = async () => {
               <p class="leading-relaxed">
                 {{ isRTL 
                   ? 'اضغط على زر "اكتب تقييمك على Google" وضع 5 نجوم مع رأيك الكريم.' 
-                  : 'Click "Write a Review on Google" below and leave your 5-star rating.' 
+                  : 'Click "Write a Review on Google" below and submit your 5-star rating.' 
                 }}
               </p>
             </div>
@@ -309,8 +309,8 @@ const handleAudienceSubmit = async () => {
               <span class="w-5 h-5 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center font-bold text-[11px] shrink-0 font-mono">2</span>
               <p class="leading-relaxed">
                 {{ isRTL 
-                  ? 'ارجع إلى هذه الصفحة واضغط "المتابعة إلى التسجيل" لإصدار تذكرتك الرقمية فوراً.' 
-                  : 'Return here and click "Continue to Registration" to generate your VIP pass.' 
+                  ? 'ارجع إلى هذه الصفحة واضغط "المتابعة لدخول السحب" لتسجيل بياناتك فوراً.' 
+                  : 'Return here and click "Continue to Enter Raffle" to submit your details.' 
                 }}
               </p>
             </div>
@@ -350,9 +350,9 @@ const handleAudienceSubmit = async () => {
           <div v-else-if="isUnlocked" class="p-3.5 rounded-2xl bg-[#a3e635]/15 border border-[#a3e635]/40 text-[#a3e635] text-xs flex items-center gap-3">
             <CheckCircle2 class="w-5 h-5 text-[#a3e635] shrink-0" />
             <div class="flex-1">
-              <div class="font-bold">{{ isRTL ? 'تم فتح التسجيل بنجاح! ✓' : 'Review Step Unlocked! ✓' }}</div>
+              <div class="font-bold">{{ isRTL ? 'تم فتح التسجيل في السحب بنجاح! ✓' : 'Raffle Entry Unlocked! ✓' }}</div>
               <div class="text-[11px] text-zinc-200">
-                {{ isRTL ? 'اضغط على زر المتابعة بالأسفل لتعبئة بيانات تذكرتك.' : 'Click the button below to complete your visitor pass.' }}
+                {{ isRTL ? 'اضغط على زر المتابعة بالأسفل لتسجيل بياناتك والحصول على رقم التذكرة.' : 'Click the button below to complete your entry and get your raffle ticket.' }}
               </div>
             </div>
           </div>
@@ -373,14 +373,14 @@ const handleAudienceSubmit = async () => {
 
               <span>
                 {{ isUnlocked 
-                  ? (isRTL ? 'المتابعة إلى التسجيل ➔' : 'Continue to Registration ➔') 
-                  : (isRTL ? 'مغلق • اضغط زر التقييم أعلاه أولاً' : 'Locked • Write Google Review First') 
+                  ? (isRTL ? 'المتابعة لدخول السحب ➔' : 'Continue to Enter Raffle ➔') 
+                  : (isRTL ? 'مغلق • قيّم على Google أولاً' : 'Locked • Write Google Review First') 
                 }}
               </span>
             </button>
             
             <p v-if="!isUnlocked" class="text-[11px] text-center text-zinc-500 mt-2">
-              {{ isRTL ? 'يجب النقر على زر التقييم على Google أولاً لفتح التسجيل.' : 'Clicking the Google Review button unlocks the registration form.' }}
+              {{ isRTL ? 'يجب النقر على زر التقييم على Google أولاً لفتح التسجيل في السحب.' : 'Clicking the Google Review button unlocks the raffle entry form.' }}
             </p>
           </div>
         </div>
@@ -411,16 +411,16 @@ const handleAudienceSubmit = async () => {
           <!-- Title & Subtitle (Strict Monolingual) -->
           <div class="text-center space-y-2">
             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600/10 border border-red-500/30 text-red-400 text-xs font-mono font-bold uppercase">
-              <Ticket class="w-3.5 h-3.5" />
-              <span>{{ isRTL ? 'تذكرة حضور الجمهور والزوار مجاناً' : 'Free Audience & Spectator Pass' }}</span>
+              <Sparkles class="w-3.5 h-3.5" />
+              <span>{{ isRTL ? 'سحب الجمهور على الجوائز القيّمة' : 'Audience Prize Raffle' }}</span>
             </div>
             <h1 class="text-2xl sm:text-3xl font-black uppercase text-white tracking-tight font-display">
-              {{ isRTL ? 'تأكيد تذكرة الدخول' : 'HAMMER CHALLENGE PASS' }}
+              {{ isRTL ? 'امسح • قيّم • اربح' : 'SCAN • REVIEW • WIN' }}
             </h1>
-            <p class="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed">
+            <p class="text-xs text-zinc-300 max-w-md mx-auto leading-relaxed">
               {{ isRTL 
-                ? 'أدخل بياناتك بالأسفل للحصول على بطاقة الدخول الرقمية لحضور المنافسات الحية!' 
-                : 'Enter your details below to claim your digital entrance pass to watch the live showdown!' 
+                ? 'أدخل بياناتك بالأسفل لدخول السحب وإصدار رقم تذكرتك الرسمي فوراً!' 
+                : 'Enter your details below to join the raffle and claim your official ticket number!' 
               }}
             </p>
           </div>
@@ -430,8 +430,8 @@ const handleAudienceSubmit = async () => {
             <div class="flex items-center gap-2">
               <Clock class="w-4 h-4 text-red-400 shrink-0" />
               <div>
-                <div class="text-[10px] text-zinc-500 uppercase font-mono">{{ isRTL ? 'موعد الحضور' : 'Check-in Time' }}</div>
-                <div class="font-bold text-zinc-200">{{ isRTL ? '7:30 مساءً • 12 سبتمبر 2026' : '7:30 PM • 12 Sep 2026' }}</div>
+                <div class="text-[10px] text-zinc-500 uppercase font-mono">{{ isRTL ? 'توقيت الفعالية' : 'Event Timing' }}</div>
+                <div class="font-bold text-zinc-200">{{ isRTL ? '5:00 مساءً – 10:00 مساءً • 12 سبتمبر 2026' : '5:00 PM – 10:00 PM • 12 Sep 2026' }}</div>
               </div>
             </div>
             <div class="flex items-center gap-2">
@@ -483,7 +483,7 @@ const handleAudienceSubmit = async () => {
                 />
               </div>
               <p class="text-[11px] text-zinc-500 mt-1">
-                {{ isRTL ? 'سيتم ربط تذكرة الدخول بهذا الرقم لتأكيد الحضور عند المدخل.' : 'Ticket confirmation pass will be linked to this phone number.' }}
+                {{ isRTL ? 'سيتم ربط تذكرة السحب بهذا الرقم لتأكيد الفوز عند السحب.' : 'Your raffle ticket will be linked to this phone number for prize draw verification.' }}
               </p>
             </div>
 
@@ -518,8 +518,8 @@ const handleAudienceSubmit = async () => {
               </div>
               <p class="text-[11px] text-zinc-400 mt-1.5 leading-relaxed">
                 {{ isRTL 
-                  ? 'يرجى كتابة الاسم المسجل به في تقييم Google ليتمكن فريق الاستقبال من مطابقة تقييمك بـ 5 نجوم عند البوابة.' 
-                  : 'Used by booth staff at the event entrance to quickly verify your 5-star Google review.' 
+                  ? 'يرجى كتابة الاسم المسجل به في تقييم Google ليتمكن فريق الاستقبال من مطابقة تقييمك بـ 5 نجوم عند السحب.' 
+                  : 'Used by team to quickly match and verify your 5-star Google review during the raffle draw.' 
                 }}
               </p>
             </div>
@@ -558,8 +558,8 @@ const handleAudienceSubmit = async () => {
               <Ticket v-else class="w-4 h-4" />
               <span>
                 {{ isSubmitting 
-                  ? (isRTL ? 'جاري إصدار التذكرة...' : 'Issuing Your Ticket...') 
-                  : (isRTL ? 'احصل على تذكرة الحضور المجانية' : 'Get Free Audience Ticket') 
+                  ? (isRTL ? 'جاري تأكيد دخول السحب...' : 'Entering the Raffle...') 
+                  : (isRTL ? 'ادخل السحب واحصل على التذكرة' : 'Enter Raffle & Get Ticket') 
                 }}
               </span>
             </button>
