@@ -482,31 +482,18 @@ onUnmounted(() => {
         <div class="relative rounded-3xl bg-[#0c0c10]/95 border-2 border-red-600/60 p-6 sm:p-10 shadow-2xl shadow-black flex flex-col items-center backdrop-blur-2xl">
           
           <!-- State 1: IDLE -->
-          <div v-if="drawState === 'idle'" class="w-full space-y-6">
-            <!-- Audience Count Badge -->
-            <div class="inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-zinc-900 border border-zinc-700 text-sm font-mono text-zinc-300 shadow-inner">
-              <Users class="w-4 h-4 text-[#a3e635]" />
-              <span>Eligible Visitors in Pot:</span>
-              <strong class="text-white text-base">{{ eligibleCount }}</strong>
-            </div>
-
-            <!-- Big Start Draw Trigger -->
-            <div class="py-4">
-              <button
-                type="button"
-                :disabled="isLoading || eligibleCount === 0"
-                @click="startRaffleDraw"
-                class="w-full sm:w-auto px-10 py-6 rounded-3xl bg-gradient-to-r from-red-600 via-red-500 to-red-600 hover:from-red-500 hover:to-red-400 text-white font-black text-xl sm:text-2xl uppercase tracking-widest shadow-2xl shadow-red-950/80 transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer ring-4 ring-red-500/40 flex items-center justify-center gap-4 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Flame class="w-7 h-7 text-white animate-pulse" />
-                <span>START 10-SEC LIVE DRAW</span>
-                <Flame class="w-7 h-7 text-white animate-pulse" />
-              </button>
-            </div>
-
-            <p class="text-xs text-zinc-400 font-mono uppercase tracking-wider">
-              10-Second Suspense Reel • 100% Random Algorithmic Selection
-            </p>
+          <div v-if="drawState === 'idle'" class="w-full py-4 flex flex-col items-center justify-center">
+            <!-- Start Draw Trigger -->
+            <button
+              type="button"
+              :disabled="isLoading || eligibleCount === 0"
+              @click="startRaffleDraw"
+              class="px-12 sm:px-16 py-5 sm:py-6 rounded-3xl bg-gradient-to-r from-red-600 via-red-500 to-red-600 hover:from-red-500 hover:to-red-400 text-white font-black text-2xl sm:text-3xl uppercase tracking-widest shadow-2xl shadow-red-950/80 transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer ring-4 ring-red-500/40 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Flame class="w-6 h-6 text-white animate-pulse" />
+              <span>Start</span>
+              <Flame class="w-6 h-6 text-white animate-pulse" />
+            </button>
           </div>
 
           <!-- State 2: 10-SECOND LIVE COUNTDOWN & SLOT REEL -->
