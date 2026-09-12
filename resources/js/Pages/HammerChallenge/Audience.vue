@@ -8,8 +8,6 @@ import {
   Phone, 
   Mail, 
   Sparkles, 
-  MapPin, 
-  Clock, 
   CheckCircle2, 
   ArrowRight, 
   ArrowLeft,
@@ -175,12 +173,6 @@ const handleAudienceSubmit = async () => {
       <div class="flex items-center gap-3">
         <!-- Main Website Style Dropdown Language Switcher -->
         <HammerLanguageSwitcher />
-
-        <!-- Event Tag Badge -->
-        <div class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-950/60 border border-red-500/40 text-red-300 text-xs font-bold font-mono shadow-sm">
-          <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-          <span>{{ isRTL ? 'سحب الجمهور' : 'AUDIENCE RAFFLE' }}</span>
-        </div>
       </div>
     </header>
 
@@ -389,8 +381,8 @@ const handleAudienceSubmit = async () => {
         <!-- STEP 2: REGISTRATION FORM                                -->
         <!-- ======================================================== -->
         <div v-else class="space-y-6 animate-in fade-in duration-200">
-          <!-- Back to Review Step Link & Verified Badge -->
-          <div class="flex items-center justify-between">
+          <!-- Back to Review Step Link -->
+          <div>
             <button
               type="button"
               @click="goToStep1"
@@ -400,20 +392,10 @@ const handleAudienceSubmit = async () => {
               <ArrowRight v-else class="w-3.5 h-3.5" />
               <span>{{ isRTL ? 'العودة لخطوة التقييم' : 'Back to Review Step' }}</span>
             </button>
-
-            <!-- Verified Review Badge in Electric Lime -->
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#a3e635]/15 border border-[#a3e635]/40 text-[#a3e635] text-[11px] font-mono font-bold">
-              <CheckCircle2 class="w-3.5 h-3.5" />
-              <span>{{ isRTL ? 'التقييم معتمد' : 'Review Verified' }}</span>
-            </div>
           </div>
 
           <!-- Title & Subtitle (Strict Monolingual) -->
           <div class="text-center space-y-2">
-            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600/10 border border-red-500/30 text-red-400 text-xs font-mono font-bold uppercase">
-              <Sparkles class="w-3.5 h-3.5" />
-              <span>{{ isRTL ? 'سحب الجمهور على الجوائز القيّمة' : 'Audience Prize Raffle' }}</span>
-            </div>
             <h1 class="text-2xl sm:text-3xl font-black uppercase text-white tracking-tight font-display">
               {{ isRTL ? 'امسح • قيّم • اربح' : 'SCAN • REVIEW • WIN' }}
             </h1>
@@ -423,24 +405,6 @@ const handleAudienceSubmit = async () => {
                 : 'Enter your details below to join the raffle and claim your official ticket number!' 
               }}
             </p>
-          </div>
-
-          <!-- Quick Event Snapshot (Strict Monolingual) -->
-          <div class="grid grid-cols-2 gap-2.5 p-3 rounded-2xl bg-[#121217] border border-zinc-800 text-xs text-zinc-300">
-            <div class="flex items-center gap-2">
-              <Clock class="w-4 h-4 text-red-400 shrink-0" />
-              <div>
-                <div class="text-[10px] text-zinc-500 uppercase font-mono">{{ isRTL ? 'توقيت الفعالية' : 'Event Timing' }}</div>
-                <div class="font-bold text-zinc-200">{{ isRTL ? '5:00 مساءً – 10:00 مساءً • 12 سبتمبر 2026' : '5:00 PM – 10:00 PM • 12 Sep 2026' }}</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <MapPin class="w-4 h-4 text-[#a3e635] shrink-0" />
-              <div>
-                <div class="text-[10px] text-zinc-500 uppercase font-mono">{{ isRTL ? 'الموقع' : 'Location' }}</div>
-                <div class="font-bold text-zinc-200">{{ isRTL ? 'مصفح M37، أبوظبي' : 'Musaffah M37, Abu Dhabi' }}</div>
-              </div>
-            </div>
           </div>
 
           <!-- Registration Form (Strict Monolingual: Zero mixed language) -->
