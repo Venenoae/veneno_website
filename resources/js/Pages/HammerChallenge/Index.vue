@@ -1,19 +1,18 @@
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import Navbar from '@/Components/Navbar.vue';
-import { AlertCircle, ArrowRight, CheckCircle2, MapPin, Trophy } from 'lucide-vue-next';
+import { 
+  AlertCircle, 
+  ArrowRight, 
+  CheckCircle2, 
+  MapPin, 
+  Trophy, 
+  Lock, 
+  Ticket,
+  Sparkles 
+} from 'lucide-vue-next';
 import { useI18n } from '@/i18n';
-
-const form = reactive({
-  full_name: '',
-  date_of_birth: '',
-  mobile: '',
-  email: '',
-  emergency_contact_name: '',
-  emergency_contact_number: '',
-  terms_accepted: false,
-});
 
 const { t, currentLocale } = useI18n();
 
@@ -27,9 +26,6 @@ const countdownUnits = computed(() => {
   ];
 });
 
-const errors = ref({});
-const generalError = ref('');
-const isSubmitting = ref(false);
 const countdown = ref({ days: '00', hours: '00', minutes: '00', seconds: '00' });
 let countdownTimer = null;
 
@@ -53,56 +49,6 @@ onMounted(() => {
 onUnmounted(() => {
   if (countdownTimer) clearInterval(countdownTimer);
 });
-
-const age = computed(() => {
-  if (!form.date_of_birth) return null;
-  const birthDate = new Date(`${form.date_of_birth}T00:00:00`);
-  if (Number.isNaN(birthDate.getTime())) return null;
-
-  const today = new Date();
-  let years = today.getFullYear() - birthDate.getFullYear();
-  if (today.getMonth() < birthDate.getMonth() || (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) {
-    years -= 1;
-  }
-  return years;
-});
-
-const fieldError = (field) => errors.value[field]?.[0] || '';
-
-const validate = () => {
-  const nextErrors = {};
-  const requiredFields = ['full_name', 'date_of_birth', 'mobile', 'email', 'emergency_contact_name', 'emergency_contact_number'];
-  requiredFields.forEach((field) => {
-    if (!String(form[field] || '').trim()) nextErrors[field] = [t('hammer.registration.required')];
-  });
-
-  if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) nextErrors.email = [t('hammer.registration.validEmail')];
-  if (form.mobile && !/^\+?[0-9\s().-]{7,20}$/.test(form.mobile)) nextErrors.mobile = [t('hammer.registration.validMobile')];
-  if (form.emergency_contact_number && !/^\+?[0-9\s().-]{7,20}$/.test(form.emergency_contact_number)) nextErrors.emergency_contact_number = [t('hammer.registration.validEmergency')];
-  if (age.value !== null && age.value < 18) nextErrors.date_of_birth = [t('hammer.registration.minimumAge')];
-  if (!form.terms_accepted) nextErrors.terms_accepted = [t('hammer.registration.requiredDeclaration')];
-
-  errors.value = nextErrors;
-  return Object.keys(nextErrors).length === 0;
-};
-
-const submit = async () => {
-  generalError.value = '';
-  if (!validate()) return;
-
-  isSubmitting.value = true;
-  try {
-    const response = await window.axios.post('/api/hammer-challenge/register', { ...form });
-    const token = response.data?.registration?.confirmation_token;
-    if (!token) throw new Error('The server did not return a confirmation token.');
-    window.location.assign(`/hammer-challenge/confirmation?token=${encodeURIComponent(token)}`);
-  } catch (error) {
-    errors.value = error.response?.data?.errors || {};
-    generalError.value = error.response?.data?.message || error.message || t('hammer.registration.registrationFailed');
-  } finally {
-    isSubmitting.value = false;
-  }
-};
 </script>
 
 <template>
@@ -112,22 +58,47 @@ const submit = async () => {
     <Navbar />
 
     <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+      <!-- Hero Section -->
       <section class="relative overflow-hidden rounded-3xl border border-red-500/30 bg-gradient-to-br from-[#111114] via-[#09090b] to-black shadow-2xl shadow-black/60">
         <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-[#a3e635]"></div>
         <div class="relative z-10 grid items-stretch lg:grid-cols-[1fr_0.82fr]">
           <div class="flex flex-col justify-center p-6 sm:p-10 lg:p-12">
-            <div class="flex flex-wrap items-center gap-2"><div class="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-red-300">{{ t('hammer.eventSeries') }}</div><div class="rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider text-zinc-400">{{ t('hammer.registration.registrationOpen') }}</div></div>
-            <h1 class="mt-5 max-w-3xl font-display text-3xl font-black uppercase leading-tight tracking-wide text-white sm:text-6xl">{{ t('hammer.title') }} <span class="text-[#a3e635]">{{ t('hammer.final') }}</span></h1>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-red-300">
+                {{ t('hammer.eventSeries') }}
+              </div>
+              <div class="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-950/70 px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider text-red-400 font-bold">
+                <Lock class="w-3 h-3" />
+                <span>{{ t('hammer.registration.registrationClosed') }}</span>
+              </div>
+            </div>
+            
+            <h1 class="mt-5 max-w-3xl font-display text-3xl font-black uppercase leading-tight tracking-wide text-white sm:text-6xl">
+              {{ t('hammer.title') }} <span class="text-[#a3e635]">{{ t('hammer.final') }}</span>
+            </h1>
+            
             <div class="mt-6 grid gap-3 text-sm text-zinc-300 sm:grid-cols-2 sm:text-base">
               <p><span class="mr-2 text-[10px] font-mono uppercase tracking-widest text-zinc-500">{{ t('hammer.registration.dateLabel') }}</span>{{ t('hammer.date') }}</p>
               <p class="flex items-start gap-2"><MapPin class="mt-0.5 h-4 w-4 shrink-0 text-red-400" /> {{ t('hammer.registration.location') }}</p>
               <p class="sm:col-span-2">{{ t('hammer.registration.checkInLabel') }} <strong class="text-white font-mono">5:00 PM – 10:00 PM</strong></p>
             </div>
+            
             <div class="mt-7 flex flex-wrap items-center gap-3">
-              <Link href="#registration-form" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-red-600 px-5 py-3 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-red-950/50 transition hover:brightness-110">{{ t('hammer.registration.registerNow') }} <ArrowRight class="h-4 w-4" /></Link>
-              <span class="text-xs font-mono uppercase tracking-widest text-zinc-500">{{ t('hammer.registration.eventTagline') }}</span>
+              <Link 
+                :href="currentLocale === 'ar' ? '/ar/hammer-challenge/audience' : '/hammer-challenge/audience'" 
+                class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-red-600 px-5 py-3 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-red-950/50 transition hover:brightness-110 active:scale-98"
+              >
+                <Ticket class="h-4 w-4" />
+                <span>{{ t('hammer.registration.audiencePassCta') }}</span>
+                <ArrowRight class="h-4 w-4 rtl:rotate-180" />
+              </Link>
+              <span class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">
+                <Lock class="w-3.5 h-3.5 text-red-400" />
+                <span>{{ t('hammer.registration.registrationClosed') }}</span>
+              </span>
             </div>
           </div>
+          
           <div class="flex min-h-[360px] items-center justify-center border-t border-zinc-800/80 p-5 sm:p-8 lg:border-l lg:border-t-0 lg:p-10">
             <picture class="block h-full w-full max-w-[420px]">
               <source media="(max-width: 639px)" srcset="/images/hammer/Hammer3.jpeg" />
@@ -135,162 +106,176 @@ const submit = async () => {
             </picture>
           </div>
         </div>
+        
         <div class="relative z-10 border-t border-zinc-800/80 px-6 py-5 sm:px-10 lg:px-12">
           <p class="text-[10px] font-mono uppercase tracking-[0.2em] text-[#a3e635] font-bold">{{ t('hammer.registration.countdown') }}</p>
           <div class="mt-2 grid grid-cols-4 gap-2">
-            <div v-for="unit in countdownUnits" :key="unit.key" class="rounded-xl border border-white/15 bg-black/65 p-2 text-center backdrop-blur-md sm:p-3"><p class="font-mono text-xl font-black text-white sm:text-2xl">{{ countdown[unit.key] }}</p><p class="text-[9px] uppercase tracking-wider text-zinc-400">{{ unit.label }}</p></div>
+            <div v-for="unit in countdownUnits" :key="unit.key" class="rounded-xl border border-white/15 bg-black/65 p-2 text-center backdrop-blur-md sm:p-3">
+              <p class="font-mono text-xl font-black text-white sm:text-2xl">{{ countdown[unit.key] }}</p>
+              <p class="text-[9px] uppercase tracking-wider text-zinc-400">{{ unit.label }}</p>
+            </div>
           </div>
         </div>
       </section>
 
-  <section class="mt-5 max-w-xxl">
-  <div
-    class="group relative overflow-hidden rounded-3xl border border-red-500/40
-           bg-zinc-950/90 p-6 shadow-2xl shadow-red-950/30
-           backdrop-blur-xl transition-all duration-500
-           hover:-translate-y-1 hover:border-red-400/60
-           hover:shadow-red-950/50"
-  >
-
-    <!-- Ambient glow -->
-    <div
-      class="pointer-events-none absolute -right-16 -top-16 h-48 w-48
-             rounded-full bg-red-600/20 blur-3xl
-             transition-all duration-700 group-hover:bg-red-500/30"
-    ></div>
-
-    <div
-      class="pointer-events-none absolute -bottom-20 -left-20 h-40 w-40
-             rounded-full bg-[#a3e635]/10 blur-3xl"
-    ></div>
-
-    <!-- Shine effect -->
-    <div
-      class="pointer-events-none absolute inset-0 -translate-x-full
-             bg-gradient-to-r from-transparent via-white/10 to-transparent
-             transition-transform duration-1000 group-hover:translate-x-full"
-    ></div>
-
-    <!-- Header -->
-    <div class="relative flex items-center justify-between">
-
-      <div class="flex items-center gap-4">
-
-        <!-- Trophy in Electric Lime -->
+      <!-- Grand Prize Section -->
+      <section class="mt-5 max-w-xxl">
         <div
-          class="flex h-14 w-14 items-center justify-center rounded-2xl
-                 border border-[#a3e635]/40
-                 bg-gradient-to-br from-[#a3e635]/20 to-zinc-900
-                 shadow-lg shadow-[#a3e635]/10"
+          class="group relative overflow-hidden rounded-3xl border border-red-500/40
+                 bg-zinc-950/90 p-6 shadow-2xl shadow-red-950/30
+                 backdrop-blur-xl transition-all duration-500
+                 hover:-translate-y-1 hover:border-red-400/60
+                 hover:shadow-red-950/50"
         >
-          <svg
-            class="h-7 w-7 text-[#a3e635]"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M8 21h8m-4-4v4m-5-9a5 5 0 0010 0V4H7v8z"
-            />
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M7 6H4a1 1 0 00-1 1v1a4 4 0 004 4m10-6h3a1 1 0 011 1v1a4 4 0 01-4 4"
-            />
-          </svg>
+          <!-- Ambient glow -->
+          <div
+            class="pointer-events-none absolute -right-16 -top-16 h-48 w-48
+                   rounded-full bg-red-600/20 blur-3xl
+                   transition-all duration-700 group-hover:bg-red-500/30"
+          ></div>
+
+          <div
+            class="pointer-events-none absolute -bottom-20 -left-20 h-40 w-40
+                   rounded-full bg-[#a3e635]/10 blur-3xl"
+          ></div>
+
+          <!-- Shine effect -->
+          <div
+            class="pointer-events-none absolute inset-0 -translate-x-full
+                   bg-gradient-to-r from-transparent via-white/10 to-transparent
+                   transition-transform duration-1000 group-hover:translate-x-full"
+          ></div>
+
+          <!-- Header -->
+          <div class="relative flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <!-- Trophy in Electric Lime -->
+              <div
+                class="flex h-14 w-14 items-center justify-center rounded-2xl
+                       border border-[#a3e635]/40
+                       bg-gradient-to-br from-[#a3e635]/20 to-zinc-900
+                       shadow-lg shadow-[#a3e635]/10"
+              >
+                <svg
+                  class="h-7 w-7 text-[#a3e635]"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8 21h8m-4-4v4m-5-9a5 5 0 0010 0V4H7v8z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M7 6H4a1 1 0 00-1 1v1a4 4 0 004 4m10-6h3a1 1 0 011 1v1a4 4 0 01-4 4"
+                  />
+                </svg>
+              </div>
+
+              <div>
+                <p class="text-[10px] font-black uppercase tracking-[0.25em] text-[#a3e635]">
+                  {{ t('hammer.registration.firstPlace') }}
+                </p>
+
+                <p class="mt-1 text-sm font-semibold text-white/70">
+                  {{ t('hammer.registration.cashPrize') }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Winner badge -->
+            <div
+              class="hidden rounded-full border border-[#a3e635]/30
+                     bg-[#a3e635]/15 px-3 py-1.5
+                     text-[10px] font-black uppercase tracking-widest
+                     text-[#a3e635] sm:block font-mono"
+            >
+              {{ t('hammer.registration.firstPlace') }}
+            </div>
+          </div>
+
+          <!-- Prize -->
+          <div class="relative mt-7">
+            <div class="flex items-end gap-3">
+              <span
+                class="text-5xl font-black tracking-tight text-white
+                       drop-shadow-[0_0_20px_rgba(239,68,68,0.25)]
+                       sm:text-6xl"
+              >
+                AED 15,000
+              </span>
+            </div>
+
+            <div class="mt-3 flex items-center gap-2">
+              <span class="h-1.5 w-1.5 rounded-full bg-[#a3e635]"></span>
+              <p class="text-xs font-medium tracking-wide text-zinc-300">
+                {{ t('hammer.registration.cashPrize') }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Bottom accent -->
+          <div class="relative mt-6 h-px overflow-hidden bg-white/5">
+            <div
+              class="h-full w-1/3 bg-gradient-to-r
+                     from-transparent via-red-500 to-transparent
+                     transition-all duration-700
+                     group-hover:w-full"
+            ></div>
+          </div>
+
+          <!-- Footer -->
+          <div class="relative mt-4 flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+              {{ currentLocale === 'ar' ? 'الجائزة الكبرى' : 'Grand Prize' }}
+            </span>
+
+            <div class="flex items-center gap-1.5">
+              <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-[#a3e635]"></span>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-[#a3e635] font-mono">
+                {{ currentLocale === 'ar' ? 'مكافأة الفائز' : 'Winner Reward' }}
+              </span>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div>
-          <p class="text-[10px] font-black uppercase tracking-[0.25em] text-[#a3e635]">
-            {{ t('hammer.registration.firstPlace') }}
-          </p>
-
-          <p class="mt-1 text-sm font-semibold text-white/70">
-            {{ t('hammer.registration.cashPrize') }}
-          </p>
-        </div>
-
-      </div>
-
-      <!-- Winner badge -->
-      <div
-        class="hidden rounded-full border border-[#a3e635]/30
-               bg-[#a3e635]/15 px-3 py-1.5
-               text-[10px] font-black uppercase tracking-widest
-               text-[#a3e635] sm:block font-mono"
-      >
-        {{ t('hammer.registration.firstPlace') }}
-      </div>
-    </div>
-
-    <!-- Prize -->
-    <div class="relative mt-7">
-
-      <div class="flex items-end gap-3">
-        <span
-          class="text-5xl font-black tracking-tight text-white
-                 drop-shadow-[0_0_20px_rgba(239,68,68,0.25)]
-                 sm:text-6xl"
-        >
-          AED 15,000
-        </span>
-      </div>
-
-      <div class="mt-3 flex items-center gap-2">
-        <span class="h-1.5 w-1.5 rounded-full bg-[#a3e635]"></span>
-
-        <p class="text-xs font-medium tracking-wide text-zinc-300">
-          {{ t('hammer.registration.cashPrize') }}
-        </p>
-      </div>
-    </div>
-
-    <!-- Bottom accent -->
-    <div class="relative mt-6 h-px overflow-hidden bg-white/5">
-      <div
-        class="h-full w-1/3 bg-gradient-to-r
-               from-transparent via-red-500 to-transparent
-               transition-all duration-700
-               group-hover:w-full"
-      ></div>
-    </div>
-
-    <!-- Footer -->
-    <div class="relative mt-4 flex items-center justify-between">
-
-      <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-        {{ currentLocale === 'ar' ? 'الجائزة الكبرى' : 'Grand Prize' }}
-      </span>
-
-      <div class="flex items-center gap-1.5">
-        <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-[#a3e635]"></span>
-        <span class="text-[10px] font-bold uppercase tracking-widest text-[#a3e635] font-mono">
-          {{ currentLocale === 'ar' ? 'مكافأة الفائز' : 'Winner Reward' }}
-        </span>
-      </div>
-
-    </div>
-
-  </div>
-</section>
-
+      <!-- Event Details & Registration Closed Notice Showcase -->
       <div id="registration-form" class="mt-8 grid items-start gap-8 lg:grid-cols-[1fr_300px]">
-        <form @submit.prevent="submit" novalidate class="space-y-6">
-          <section class="rounded-3xl border border-zinc-800/90 bg-zinc-950/70 p-5 shadow-xl sm:p-8">
-            <div class="border-b border-zinc-800 pb-5"><p class="text-xs font-mono uppercase tracking-widest text-red-400">{{ t('hammer.registration.participantDetails') }}</p><h2 class="mt-2 font-display text-2xl font-bold uppercase text-white">{{ t('hammer.registration.securePlace') }}</h2></div>
-            <div class="mt-6 grid gap-5 sm:grid-cols-2">
-              <label class="field-label sm:col-span-2">{{ t('hammer.registration.fullName') }}<input v-model="form.full_name" type="text" autocomplete="name" class="field-input" /><span class="field-error">{{ fieldError('full_name') }}</span></label>
-              <label class="field-label">{{ t('hammer.registration.dateOfBirth') }}<input v-model="form.date_of_birth" type="date" :max="new Date().toISOString().slice(0, 10)" class="field-input" /><span v-if="age !== null" class="text-xs font-normal text-zinc-500">{{ t('hammer.registration.calculatedAge', { age }) }}</span><span class="field-error">{{ fieldError('date_of_birth') }}</span></label>
-              <label class="field-label">{{ t('hammer.registration.mobileNumber') }}<input v-model="form.mobile" type="tel" autocomplete="tel" placeholder="+971 50 123 4567" class="field-input" /><span class="field-error">{{ fieldError('mobile') }}</span></label>
-              <label class="field-label sm:col-span-2">{{ t('hammer.registration.emailAddress') }}<input v-model="form.email" type="email" autocomplete="email" class="field-input" /><span class="field-error">{{ fieldError('email') }}</span></label>
-              <label class="field-label">{{ t('hammer.registration.emergencyName') }}<input v-model="form.emergency_contact_name" type="text" autocomplete="name" class="field-input" /><span class="field-error">{{ fieldError('emergency_contact_name') }}</span></label>
-              <label class="field-label">{{ t('hammer.registration.emergencyNumber') }}<input v-model="form.emergency_contact_number" type="tel" autocomplete="tel" class="field-input" /><span class="field-error">{{ fieldError('emergency_contact_number') }}</span></label>
+        <div class="space-y-6">
+          <!-- Closed Notice Banner -->
+          <section class="rounded-3xl border-2 border-red-500/40 bg-gradient-to-b from-red-950/30 via-zinc-950/90 to-black p-6 sm:p-8 shadow-2xl shadow-black/80 backdrop-blur-xl relative overflow-hidden">
+            <div class="pointer-events-none absolute -right-20 -top-20 w-60 h-60 bg-red-600/15 rounded-full blur-3xl"></div>
+            <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div class="space-y-2.5">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/80 border border-red-500/50 text-red-400 text-xs font-mono font-bold uppercase tracking-wider">
+                  <Lock class="w-3.5 h-3.5" />
+                  <span>{{ t('hammer.registration.registrationClosed') }}</span>
+                </div>
+                <h2 class="font-display text-2xl sm:text-3xl font-black uppercase text-white tracking-tight">
+                  {{ t('hammer.registration.closedNoticeTitle') }}
+                </h2>
+                <p class="text-sm text-zinc-300 leading-relaxed max-w-xl">
+                  {{ t('hammer.registration.closedNoticeDesc') }}
+                </p>
+              </div>
+
+              <Link 
+                :href="currentLocale === 'ar' ? '/ar/hammer-challenge/audience' : '/hammer-challenge/audience'"
+                class="shrink-0 px-6 py-4 rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-red-600 hover:from-red-500 hover:to-red-400 text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl shadow-red-950/60 transition flex items-center gap-2.5 active:scale-98"
+              >
+                <Ticket class="w-4 h-4" />
+                <span>{{ t('hammer.registration.audiencePassCta') }}</span>
+                <ArrowRight class="w-4 h-4 rtl:rotate-180" />
+              </Link>
             </div>
           </section>
 
+          <!-- Competition Declarations & Rules Overview -->
           <section class="rounded-3xl border border-zinc-800/90 bg-zinc-950/70 p-5 shadow-xl sm:p-8 space-y-5">
             <div class="border-b border-zinc-800 pb-4">
               <p class="text-xs font-mono uppercase tracking-widest text-red-400">{{ t('hammer.registration.declarations') }}</p>
@@ -317,28 +302,28 @@ const submit = async () => {
               </div>
             </div>
 
-            <!-- Single Acceptance Checkbox -->
-            <label class="flex cursor-pointer items-start gap-3.5 rounded-2xl border border-red-500/40 bg-zinc-900/80 p-4 sm:p-5 transition hover:border-red-400 shadow-md">
-              <input v-model="form.terms_accepted" type="checkbox" class="mt-1 h-5 w-5 shrink-0 accent-red-600 rounded cursor-pointer" />
-              <div class="text-xs sm:text-sm leading-relaxed text-zinc-200">
-                <span class="font-bold text-white block">{{ t('hammer.registration.singleAcceptance') }}</span>
-                <div class="mt-1.5 text-xs">
-                  <Link href="/hammer-challenge/terms" target="_blank" class="text-red-400 hover:text-red-300 underline underline-offset-2">
-                    {{ t('hammer.registration.viewTerms') }}
-                  </Link>
-                </div>
-                <span v-if="fieldError('terms_accepted')" class="field-error block mt-1">{{ fieldError('terms_accepted') }}</span>
-              </div>
-            </label>
+            <div class="pt-2">
+              <Link href="/hammer-challenge/terms" target="_blank" class="text-xs font-mono text-red-400 hover:text-red-300 underline underline-offset-4 flex items-center gap-1.5">
+                <span>{{ t('hammer.registration.viewTerms') }} ➔</span>
+              </Link>
+            </div>
           </section>
-
-          <div v-if="generalError" class="flex items-start gap-3 rounded-2xl border border-red-500/40 bg-red-950/30 p-4 text-sm text-red-200"><AlertCircle class="h-5 w-5 shrink-0 text-red-400" /><span>{{ generalError }}</span></div>
-          <button type="submit" :disabled="isSubmitting" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-red-600 px-5 py-4 text-sm font-black uppercase tracking-wider text-white shadow-xl shadow-red-950/50 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"><span>{{ isSubmitting ? t('hammer.registration.submitting') : t('hammer.registration.submit') }}</span><ArrowRight class="h-4 w-4" /></button>
-        </form>
+        </div>
 
         <aside class="space-y-4 lg:sticky lg:top-24">
-          <div class="rounded-3xl border border-red-500/30 bg-gradient-to-b from-red-600/15 via-zinc-900 to-zinc-950 p-6"><Trophy class="h-8 w-8 text-[#a3e635]" /><h2 class="mt-4 font-display text-xl font-bold uppercase text-white">{{ t('hammer.registration.firstPlace') }}</h2><p class="mt-2 text-3xl font-black text-[#a3e635]">AED 15,000</p><p class="text-xs uppercase tracking-widest text-zinc-400">{{ t('hammer.registration.cashPrize') }}</p></div>
-          <div class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6 text-sm text-zinc-400"><div class="flex items-center gap-2 text-[#a3e635]"><CheckCircle2 class="h-4 w-4" /><span class="font-semibold text-zinc-200">{{ t('hammer.registration.beforeEvent') }}</span></div><p class="mt-3 leading-relaxed">{{ t('hammer.registration.beforeEventText') }}</p></div>
+          <div class="rounded-3xl border border-red-500/30 bg-gradient-to-b from-red-600/15 via-zinc-900 to-zinc-950 p-6">
+            <Trophy class="h-8 w-8 text-[#a3e635]" />
+            <h2 class="mt-4 font-display text-xl font-bold uppercase text-white">{{ t('hammer.registration.firstPlace') }}</h2>
+            <p class="mt-2 text-3xl font-black text-[#a3e635]">AED 15,000</p>
+            <p class="text-xs uppercase tracking-widest text-zinc-400">{{ t('hammer.registration.cashPrize') }}</p>
+          </div>
+          <div class="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-6 text-sm text-zinc-400">
+            <div class="flex items-center gap-2 text-[#a3e635]">
+              <CheckCircle2 class="h-4 w-4" />
+              <span class="font-semibold text-zinc-200">{{ t('hammer.registration.beforeEvent') }}</span>
+            </div>
+            <p class="mt-3 leading-relaxed">{{ t('hammer.registration.beforeEventText') }}</p>
+          </div>
         </aside>
       </div>
     </main>
