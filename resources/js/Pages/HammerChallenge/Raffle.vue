@@ -419,11 +419,9 @@ onUnmounted(() => {
       </Link>
 
       <!-- Center Brand Tag -->
-      <div class="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-zinc-900/90 border border-red-500/40 shadow-xl backdrop-blur-md">
-        <div class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></div>
-        <span class="text-xs font-mono font-bold tracking-[0.25em] text-white uppercase">
-          VENENO AUTO CARE CENTER • STAGE RAFFLE ENGINE
-        </span>
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/80 border border-zinc-800 text-[11px] font-mono tracking-widest text-zinc-400 uppercase backdrop-blur-md">
+        <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+        <span>VENENO AUTO CARE</span>
       </div>
 
       <!-- Audio & Fullscreen Buttons -->
@@ -453,20 +451,26 @@ onUnmounted(() => {
     <!-- Main Stage Content -->
     <main class="relative z-10 flex-1 flex flex-col items-center justify-center py-6 my-auto text-center">
       
-      <!-- Top Title Block -->
-      <div class="space-y-2 mb-6 sm:mb-8">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-950/70 border border-red-500/50 text-red-300 text-xs font-mono font-bold uppercase tracking-widest shadow-inner">
-          <Flame class="w-4 h-4 text-red-500 animate-pulse" />
-          <span>OFFICIAL AUDIENCE PRIZE RAFFLE</span>
-          <Flame class="w-4 h-4 text-red-500 animate-pulse" />
+      <!-- Top Title Block with Veneno Logo and Scan. Review. Win Title -->
+      <div class="space-y-3.5 mb-6 sm:mb-8 flex flex-col items-center">
+        <!-- Official Veneno Brand Logo -->
+        <div class="flex items-center justify-center p-2">
+          <img 
+            src="/images/logo.png" 
+            alt="Veneno Auto Care Center" 
+            class="h-8 sm:h-10 md:h-12 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]"
+          />
         </div>
 
-        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-white to-[#a3e635] drop-shadow-2xl font-display">
-          LIVE RAFFLE DRAW
+        <!-- English Title -->
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-white to-[#a3e635] drop-shadow-2xl font-display leading-tight">
+          RAFFLE DRAW • SCAN. REVIEW. WIN
         </h1>
-        <p class="text-xl sm:text-2xl font-bold text-zinc-300">
-          سحب الجمهور المباشر • الفائز العشوائي
-        </p>
+
+        <!-- Arabic Title (Same Size & Equal Visual Prominence) -->
+        <h2 dir="rtl" class="text-2xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#a3e635] via-white to-red-500 drop-shadow-2xl font-sans leading-tight">
+          سحب جوائز • امسح • قيّم • اربح
+        </h2>
       </div>
 
       <!-- Central Action / Reel Area -->
