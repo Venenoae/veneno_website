@@ -13,7 +13,6 @@ import {
   ArrowLeft,
   Loader2, 
   Ticket,
-  Flame,
   ShieldCheck,
   Star,
   Lock,
@@ -528,23 +527,6 @@ const handleAudienceSubmit = async () => {
               </span>
             </button>
           </form>
-
-          <!-- Divider & Contestant Switcher Notice (Pure Language) -->
-          <div class="mt-6 pt-5 border-t border-zinc-800 text-center">
-            <p class="text-xs text-zinc-400">
-              {{ isRTL ? 'هل ترغب في خوض المنافسة على جائزة ' : 'Want to compete for the ' }}
-              <strong class="text-white font-bold">{{ isRTL ? '15,000 درهم كاش؟' : 'AED 15,000 Cash Prize?' }}</strong>
-            </p>
-            <Link
-              :href="isRTL ? '/ar/hammer-challenge/register' : '/hammer-challenge/register'"
-              class="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-red-400 hover:text-red-300 underline transition"
-            >
-              <Flame class="w-3.5 h-3.5 text-red-500" />
-              <span>{{ isRTL ? 'التسجيل كمتسابق في التحدي (18+)' : 'Register as a Contestant (18+)' }}</span>
-              <ArrowRight v-if="!isRTL" class="w-3 h-3" />
-              <ArrowLeft v-else class="w-3 h-3" />
-            </Link>
-          </div>
         </div>
       </div>
     </main>
