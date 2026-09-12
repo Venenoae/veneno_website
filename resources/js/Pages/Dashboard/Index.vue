@@ -1092,7 +1092,7 @@ const handleLogout = () => {
               :class="hammerSubTab === 'audience' ? 'text-amber-400 border-amber-400 bg-amber-500/10 rounded-t-xl' : 'text-zinc-400 border-transparent hover:text-zinc-200'"
             >
               <Users class="w-3.5 h-3.5" />
-              <span>Audience & Visitors ({{ hammerAudiences?.length || 0 }})</span>
+              <span>Audience ({{ hammerAudiences?.length || 0 }})</span>
             </button>
 
             <button
@@ -1107,7 +1107,7 @@ const handleLogout = () => {
           </div>
 
           <!-- ============================================== -->
-          <!-- SUB-TAB 1: AUDIENCE & VISITORS                 -->
+          <!-- SUB-TAB 1: AUDIENCE                            -->
           <!-- ============================================== -->
           <div v-if="hammerSubTab === 'audience'" class="space-y-4 animate-in fade-in duration-150">
             <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
@@ -1116,7 +1116,7 @@ const handleLogout = () => {
                 <input
                   v-model="hammerAudienceSearch"
                   type="search"
-                  placeholder="Search visitor name, ticket number (VHA-XXXX), mobile, email..."
+                  placeholder="Search audience name, ticket number (VHA-XXXX), mobile, email..."
                   class="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 pl-10 pr-4 text-xs text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none"
                 />
               </div>

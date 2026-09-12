@@ -457,7 +457,7 @@ onUnmounted(() => {
       <div class="space-y-2 mb-6 sm:mb-8">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-950/70 border border-red-500/50 text-red-300 text-xs font-mono font-bold uppercase tracking-widest shadow-inner">
           <Flame class="w-4 h-4 text-red-500 animate-pulse" />
-          <span>OFFICIAL AUDIENCE & VISITOR LUCKY DRAW</span>
+          <span>OFFICIAL AUDIENCE PRIZE RAFFLE</span>
           <Flame class="w-4 h-4 text-red-500 animate-pulse" />
         </div>
 
@@ -465,7 +465,7 @@ onUnmounted(() => {
           LIVE RAFFLE DRAW
         </h1>
         <p class="text-xl sm:text-2xl font-bold text-zinc-300">
-          سحب الجمهور والزوار المباشر • الفائز العشوائي
+          سحب الجمهور المباشر • الفائز العشوائي
         </p>
       </div>
 
