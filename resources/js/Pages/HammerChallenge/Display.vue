@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import QRCode from 'qrcode';
-import { Camera, Sparkles, MapPin, Clock, Trophy, Flame, Maximize2, Minimize2 } from 'lucide-vue-next';
+import { Camera, MapPin, Clock, Trophy, Maximize2, Minimize2 } from 'lucide-vue-next';
 
 const props = defineProps({
   targetUrl: { type: String, default: 'https://veneno.ae/hammer-challenge/audience' },
@@ -211,14 +211,24 @@ onUnmounted(() => {
       <div class="absolute -bottom-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-t from-lime-500/15 via-red-950/20 to-transparent blur-3xl"></div>
     </div>
 
-    <!-- Top Header / Main Exhibition Title -->
-    <header class="relative z-10 flex flex-col items-center text-center space-y-2 pt-2 sm:pt-4">
+    <!-- Top Header / Veneno Brand Logo & Scan Review Win Title -->
+    <header class="relative z-10 flex flex-col items-center text-center space-y-3 pt-2 sm:pt-4 w-full max-w-4xl mx-auto px-4">
+      <!-- Veneno Brand Logo at Top -->
+      <div class="w-full flex justify-center">
+        <img 
+          src="/images/logo.png" 
+          alt="Veneno Auto Care Center" 
+          class="h-12 sm:h-16 md:h-20 w-auto max-w-[85%] sm:max-w-md object-contain brightness-110 drop-shadow-[0_4px_24px_rgba(239,68,68,0.25)]" 
+        />
+      </div>
+
+      <!-- Main Exhibition Title: SCAN • REVIEW • WIN -->
       <div class="space-y-1">
-        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-white to-lime-400 drop-shadow-2xl font-display">
-          HAMMER CHALLENGE
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-white to-lime-400 drop-shadow-2xl font-display">
+          SCAN • REVIEW • WIN
         </h1>
-        <p class="text-xl sm:text-3xl font-bold text-zinc-200 tracking-wide font-display">
-          تحدي مطرقة فينينو
+        <p class="text-lg sm:text-2xl font-bold text-zinc-200 tracking-wide font-display">
+          امسح • قيّم • اربح
         </p>
       </div>
     </header>
@@ -256,13 +266,6 @@ onUnmounted(() => {
 
           <!-- Slogan & Call to Action Below QR -->
           <div class="mt-4 text-center space-y-1.5 max-w-sm px-2">
-            <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-lime-500/15 border border-lime-400/40 text-lime-400 text-sm sm:text-base font-black tracking-wide uppercase shadow-lg shadow-lime-950/40">
-              <Sparkles class="w-4 h-4 text-lime-400 animate-pulse" />
-              <span>SCAN • REVIEW • WIN</span>
-              <span class="text-xs opacity-60">|</span>
-              <span class="font-bold">امسح • قيّم • اربح</span>
-              <Sparkles class="w-4 h-4 text-lime-400 animate-pulse" />
-            </div>
             <p class="text-xs sm:text-sm font-bold text-white leading-snug">
               امسح الكود، اكتب تقييمك على Google وادخل السحب على جوائز مميزة!
             </p>
