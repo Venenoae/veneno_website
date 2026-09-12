@@ -96,7 +96,7 @@ const calculateCountdown = () => {
     seconds: pad(Math.floor((diff % (1000 * 60)) / 1000)),
   };
 
-  const hammerTarget = new Date('2026-09-12T19:00:00+04:00').getTime();
+  const hammerTarget = new Date('2026-09-12T17:00:00+04:00').getTime();
   const hammerDiff = Math.max(0, hammerTarget - Date.now());
   hammerCountdown.value = {
     days: pad(Math.floor(hammerDiff / (1000 * 60 * 60 * 24))),

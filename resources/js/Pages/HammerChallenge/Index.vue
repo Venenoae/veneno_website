@@ -34,7 +34,7 @@ const countdown = ref({ days: '00', hours: '00', minutes: '00', seconds: '00' })
 let countdownTimer = null;
 
 const updateCountdown = () => {
-  const target = new Date('2026-09-12T19:00:00+04:00').getTime();
+  const target = new Date('2026-09-12T17:00:00+04:00').getTime();
   const remaining = Math.max(0, target - Date.now());
   const pad = (value) => String(value).padStart(2, '0');
   countdown.value = {
