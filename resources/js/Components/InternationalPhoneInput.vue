@@ -37,8 +37,8 @@ const { currentLocale } = useI18n();
 // Comprehensive country list with flags, codes, names in EN and AR
 const countries = [
   // GCC & Middle East (Priority)
-  { code: 'AE', dial: '+971', flag: '🇦🇪', nameEn: 'United Arab Emirates', nameAr: 'الإمارات العربية المتحدة', sample: '50 123 4567' },
-  { code: 'SA', dial: '+966', flag: '🇸🇦', nameEn: 'Saudi Arabia', nameAr: 'المملكة العربية السعودية', sample: '50 123 4567' },
+  { code: 'AE', dial: '+971', flag: '🇦🇪', nameEn: 'United Arab Emirates', nameAr: 'الإمارات العربية المتحدة', sample: '501231231' },
+  { code: 'SA', dial: '+966', flag: '🇸🇦', nameEn: 'Saudi Arabia', nameAr: 'المملكة العربية السعودية', sample: '501231231' },
   { code: 'QA', dial: '+974', flag: '🇶🇦', nameEn: 'Qatar', nameAr: 'قطر', sample: '33 123 456' },
   { code: 'KW', dial: '+965', flag: '🇰🇼', nameEn: 'Kuwait', nameAr: 'الكويت', sample: '91 234 567' },
   { code: 'OM', dial: '+968', flag: '🇴🇲', nameEn: 'Oman', nameAr: 'عُمان', sample: '91 234 567' },

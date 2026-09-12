@@ -3,9 +3,9 @@ import { ref, computed, onMounted } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from '@/i18n';
 import HammerLanguageSwitcher from '@/Components/HammerLanguageSwitcher.vue';
+import InternationalPhoneInput from '@/Components/InternationalPhoneInput.vue';
 import { 
   User, 
-  Phone, 
   Mail, 
   Sparkles, 
   CheckCircle2, 
@@ -84,10 +84,6 @@ const goToStep2 = () => {
 const goToStep1 = () => {
   currentStep.value = 1;
   window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-const formatPhoneInput = (e) => {
-  form.value.mobile = e.target.value;
 };
 
 const handleAudienceSubmit = async () => {
@@ -421,24 +417,16 @@ const handleAudienceSubmit = async () => {
               </div>
             </div>
 
-            <!-- Mobile Number -->
+            <!-- Mobile Number with GCC Country Selector & Flags -->
             <div>
               <label class="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-1.5">
                 {{ isRTL ? 'رقم الهاتف المتحرك *' : 'Mobile Phone Number *' }}
               </label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 pl-3.5 rtl:pl-0 rtl:pr-3.5 flex items-center pointer-events-none text-zinc-500">
-                  <Phone class="w-4 h-4 text-red-500" />
-                </div>
-                <input
-                  v-model="form.mobile"
-                  @input="formatPhoneInput"
-                  type="tel"
-                  required
-                  :placeholder="isRTL ? 'مثال: 0501234567 أو 971...' : 'e.g. 050 123 4567 or +971...'"
-                  class="w-full pl-10 rtl:pl-4 rtl:pr-10 pr-4 py-3 rounded-xl bg-zinc-900 border border-zinc-700 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-white placeholder-zinc-500 text-sm transition outline-none font-mono"
-                />
-              </div>
+              <InternationalPhoneInput
+                v-model="form.mobile"
+                required
+                placeholder="501231231"
+              />
               <p class="text-[11px] text-zinc-500 mt-1">
                 {{ isRTL ? 'سيتم ربط تذكرة السحب بهذا الرقم لتأكيد الفوز عند السحب.' : 'Your raffle ticket will be linked to this phone number for prize draw verification.' }}
               </p>
