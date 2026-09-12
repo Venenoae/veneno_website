@@ -407,47 +407,6 @@ onUnmounted(() => {
       <div class="absolute -bottom-[20%] left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-gradient-to-t from-lime-500/15 via-red-950/20 to-transparent blur-3xl"></div>
     </div>
 
-    <!-- Top Action Bar (Admin Controls) -->
-    <header class="relative z-30 flex items-center justify-between gap-4">
-      <!-- Back to Dashboard -->
-      <Link 
-        href="/dashboard"
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-xs font-mono uppercase tracking-wider text-zinc-300 hover:text-white transition shadow-lg backdrop-blur-md"
-      >
-        <ArrowLeft class="w-3.5 h-3.5 text-red-500" />
-        <span>Dashboard</span>
-      </Link>
-
-      <!-- Center Brand Tag -->
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/80 border border-zinc-800 text-[11px] font-mono tracking-widest text-zinc-400 uppercase backdrop-blur-md">
-        <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-        <span>VENENO AUTO CARE</span>
-      </div>
-
-      <!-- Audio & Fullscreen Buttons -->
-      <div class="flex items-center gap-2">
-        <button
-          type="button"
-          @click="isMuted = !isMuted"
-          class="p-2.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition cursor-pointer shadow-md backdrop-blur-md"
-          :title="isMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'"
-        >
-          <Volume2 v-if="!isMuted" class="w-4 h-4 text-[#a3e635]" />
-          <VolumeX v-else class="w-4 h-4 text-zinc-500" />
-        </button>
-
-        <button
-          type="button"
-          @click="toggleFullscreen"
-          class="p-2.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition cursor-pointer shadow-md backdrop-blur-md"
-          :title="isFullscreen ? 'Exit Fullscreen' : 'Enter Borderless Fullscreen'"
-        >
-          <Minimize2 v-if="isFullscreen" class="w-4 h-4 text-white" />
-          <Maximize2 v-else class="w-4 h-4 text-white" />
-        </button>
-      </div>
-    </header>
-
     <!-- Main Stage Content -->
     <main class="relative z-10 flex-1 flex flex-col items-center justify-center py-6 my-auto text-center">
       
