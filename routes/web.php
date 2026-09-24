@@ -14,17 +14,15 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
 Route::get('/services/{slug}', [StorefrontController::class, 'serviceDetail'])->name('service.detail');
 
-// ADIHEX 2026 Campaign Portal & Digital Signage Kiosk
-Route::get('/adihex', [AdihexController::class, 'index'])->name('adihex.index');
-Route::get('/adihex/terms', [AdihexController::class, 'terms'])->name('adihex.terms');
-Route::get('/adihex/display', [AdihexController::class, 'display'])->name('adihex.display');
-Route::get('/adihex/screen', [AdihexController::class, 'display'])->name('adihex.screen');
-Route::get('/{locale}/adihex', [AdihexController::class, 'index'])
-    ->where('locale', 'en|ar');
-Route::get('/{locale}/adihex/terms', [AdihexController::class, 'terms'])
-    ->where('locale', 'en|ar');
-Route::get('/{locale}/adihex/display', [AdihexController::class, 'display'])
-    ->where('locale', 'en|ar');
+// ADIHEX 2026 Campaign (Concluded - All Public URLs Redirected to Storefront)
+Route::redirect('/adihex', '/')->name('adihex.index');
+Route::redirect('/adihex/terms', '/')->name('adihex.terms');
+Route::redirect('/adihex/display', '/')->name('adihex.display');
+Route::redirect('/adihex/screen', '/')->name('adihex.screen');
+Route::redirect('/{locale}/adihex', '/')->where('locale', 'en|ar');
+Route::redirect('/{locale}/adihex/terms', '/')->where('locale', 'en|ar');
+Route::redirect('/{locale}/adihex/display', '/')->where('locale', 'en|ar');
+Route::redirect('/{locale}/adihex/screen', '/')->where('locale', 'en|ar');
 
 // Hammer Challenge 2026 local event flow - Contestants
 Route::get('/hammer-challenge', [HammerChallengeController::class, 'index'])->name('hammer-challenge.index');
@@ -67,10 +65,16 @@ Route::get('/{locale}/services/{slug}', [StorefrontController::class, 'serviceDe
 Route::post('/api/quote', [StorefrontController::class, 'submitQuote'])->name('api.quote.submit');
 Route::post('/api/inquiries', [StorefrontController::class, 'storeInquiry'])->name('api.inquiries.store');
 
-// ADIHEX 2026 Activation APIs (Public)
-Route::post('/api/adihex/spin', [AdihexController::class, 'spin'])->name('api.adihex.spin');
-Route::post('/api/adihex/reserve', [AdihexController::class, 'reserve'])->name('api.adihex.reserve');
-Route::post('/api/adihex/payment-intent', [AdihexController::class, 'createPaymentIntent'])->name('api.adihex.payment-intent');
+// ADIHEX 2026 Activation APIs (Concluded - Submissions Closed)
+Route::any('/api/adihex/spin', function () {
+    return response()->json(['success' => false, 'message' => 'The ADIHEX 2026 campaign is concluded and submissions are closed.'], 410);
+})->name('api.adihex.spin');
+Route::any('/api/adihex/reserve', function () {
+    return response()->json(['success' => false, 'message' => 'The ADIHEX 2026 campaign is concluded and reservations are closed.'], 410);
+})->name('api.adihex.reserve');
+Route::any('/api/adihex/payment-intent', function () {
+    return response()->json(['success' => false, 'message' => 'The ADIHEX 2026 campaign is concluded and payment processing is closed.'], 410);
+})->name('api.adihex.payment-intent');
 
 // Hammer Challenge Public Participant APIs
 Route::post('/api/hammer-challenge/register', [HammerChallengeController::class, 'register'])->name('api.hammer-challenge.register');

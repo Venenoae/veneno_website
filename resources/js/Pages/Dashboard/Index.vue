@@ -674,13 +674,13 @@ const handleLogout = () => {
                 <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
                   ADIHEX 2026 & Leads Hub
                 </h1>
-                <span class="px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  Live Telemetry
+                <span class="px-3 py-1 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700 text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                  Campaign Concluded
                 </span>
               </div>
               <p class="text-xs sm:text-sm text-zinc-400 mt-1">
-                ADNEC Hall 4 Booth Activation • Real-time visitor spins, show package deposits, instant voucher redemptions, and website inquiries
+                ADNEC Hall 4 Booth Activation • Historic visitor spins, customer vouchers, and CRM leads archive
               </p>
             </div>
           </div>
@@ -694,25 +694,6 @@ const handleLogout = () => {
             >
               <Printer class="w-3.5 h-3.5 text-amber-400" />
               <span class="hidden sm:inline">Export CSV</span>
-            </a>
-
-            <a
-              href="/adihex/display"
-              target="_blank"
-              class="px-4 py-2.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 hover:text-white text-xs font-mono font-bold flex items-center gap-2 transition-all shadow-sm"
-              title="Open 22-Inch Portrait Kiosk Display"
-            >
-              <Tv class="w-3.5 h-3.5 text-red-400" />
-              <span class="hidden sm:inline">22" Display</span>
-            </a>
-
-            <a
-              href="/adihex"
-              target="_blank"
-              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-600 hover:brightness-110 text-white text-xs font-mono font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-950/60 transition-transform active:scale-95"
-            >
-              <span>Booth App</span>
-              <ExternalLink class="w-3.5 h-3.5" />
             </a>
           </div>
         </div>

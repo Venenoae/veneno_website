@@ -159,347 +159,60 @@ class AdihexController extends Controller
     ];
 
     /**
-     * Show the ADIHEX 2026 Interactive Portal
+     * ADIHEX Campaign is concluded - Redirect to Home.
      */
-    public function index(Request $request, ?string $locale = null): Response
+    public function index(Request $request, ?string $locale = null)
     {
-        $currentLocale = $locale ?: $request->get('locale', 'en');
-        if (!in_array($currentLocale, ['en', 'ar'])) {
-            $currentLocale = 'en';
-        }
-
-        // Calculate dynamic booth telemetry
-        $todaySpinsCount = AdihexLead::whereDate('created_at', Carbon::today())->count();
-        $displaySpinCount = 184 + $todaySpinsCount; // Baseline booth social proof + real leads
-
-        // Grand prize remaining today (5 slots per day)
-        $platinumWinnersToday = AdihexLead::whereDate('created_at', Carbon::today())
-            ->where('won_prize_tier', 'platinum_20')
-            ->count();
-        $remainingPlatinumSlots = max(0, 5 - $platinumWinnersToday);
-
-        // Check if campaign is expired (after 6 Sept 2026)
-        $campaignCutoff = Carbon::create(2026, 9, 6, 23, 59, 59);
-        $isExpired = Carbon::now()->greaterThan($campaignCutoff);
-
-        return Inertia::render('Adihex/Index', [
-            'initialLocale' => $currentLocale,
-            'prizes' => $this->prizes,
-            'packages' => $this->packages,
-            'stats' => [
-                'displaySpinCount' => $displaySpinCount,
-                'remainingPlatinumSlots' => $remainingPlatinumSlots,
-                'isExpired' => $isExpired,
-            ],
-            'stripePublicKey' => config('services.stripe.key', env('STRIPE_KEY', 'pk_test_mock_veneno')),
-        ]);
+        return redirect()->route('home');
     }
 
     /**
-     * Show the ADIHEX 2026 22-inch Portrait Digital Signage Kiosk Screen
+     * ADIHEX Display screen is concluded - Redirect to Home.
      */
-    public function display(Request $request, ?string $locale = null): Response
+    public function display(Request $request, ?string $locale = null)
     {
-        $currentLocale = $locale ?: $request->get('locale', 'ar'); // Default to Arabic for ADNEC booth display
-        if (!in_array($currentLocale, ['en', 'ar'])) {
-            $currentLocale = 'ar';
-        }
-
-        $todaySpinsCount = AdihexLead::whereDate('created_at', Carbon::today())->count();
-        $displaySpinCount = 184 + $todaySpinsCount;
-
-        $targetUrl = url('/adihex');
-
-        return Inertia::render('Adihex/Display', [
-            'initialLocale' => $currentLocale,
-            'prizes' => $this->prizes,
-            'packages' => $this->packages,
-            'targetUrl' => $targetUrl,
-            'stats' => [
-                'displaySpinCount' => $displaySpinCount,
-            ],
-        ]);
+        return redirect()->route('home');
     }
 
     /**
-     * Show the ADIHEX 2026 Official Terms & Conditions Standalone Page
+     * ADIHEX Terms is concluded - Redirect to Home.
      */
-    public function terms(Request $request, ?string $locale = null): Response
+    public function terms(Request $request, ?string $locale = null)
     {
-        $currentLocale = $locale ?: $request->get('locale', 'ar');
-        if (!in_array($currentLocale, ['en', 'ar'])) {
-            $currentLocale = 'ar';
-        }
-
-        return Inertia::render('Adihex/Terms', [
-            'initialLocale' => $currentLocale,
-        ]);
+        return redirect()->route('home');
     }
 
     /**
-     * Register Lead & Calculate Winning Spin Server-Side
+     * ADIHEX Campaign is concluded. Public spin endpoint is closed.
      */
     public function spin(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|min:3|max:100',
-            'phone' => 'required|string|min:8|max:25',
-            'email' => 'nullable|email|max:150',
-            'service_intent' => 'nullable|array',
-            'locale' => 'nullable|string|in:en,ar',
-        ]);
-
-        $normalizedPhone = preg_replace('/[^\+0-9]/', '', $validated['phone']);
-        if (!str_starts_with($normalizedPhone, '+') && str_starts_with($normalizedPhone, '971')) {
-            $normalizedPhone = '+' . $normalizedPhone;
-        } elseif (str_starts_with($normalizedPhone, '05')) {
-            $normalizedPhone = '+971' . substr($normalizedPhone, 1);
-        }
-
-        // Anti-Gaming: Unique Single Chance Participation per Phone Number
-        $existingLead = AdihexLead::where('phone', $normalizedPhone)
-            ->latest()
-            ->first();
-
-        if ($existingLead) {
-            $isAr = ($validated['locale'] ?? $existingLead->locale) === 'ar';
-            return response()->json([
-                'success' => false,
-                'already_participated' => true,
-                'lead_id' => $existingLead->id,
-                'voucher_code' => $existingLead->voucher_code,
-                'won_prize_tier' => $existingLead->won_prize_tier,
-                'won_prize_label' => $existingLead->getPrizeLabel($isAr ? 'ar' : 'en'),
-                'whatsapp_url' => $existingLead->getWhatsAppUrl(),
-                'title_en' => 'Phone Number Already Registered',
-                'title_ar' => 'هذا الرقم مسجل مسبقاً',
-                'message_en' => "You have already participated in the ADIHEX 2026 spin. Each visitor is eligible for 1 lucky chance only.\n\nYour official voucher code and prize details were sent via SMS to your phone ({$normalizedPhone}). Please present your SMS message upon visiting the Veneno Auto Care center to claim your reward.",
-                'message_ar' => "لقد شاركت مسبقاً في سحب أديهيكس 2026. يحق لكل زائر فرصة مشاركة واحدة فقط.\n\nتم إرسال كود القسيمة الرسمي وتفاصيل جائزتك في رسالة SMS نصية إلى هاتفك ({$normalizedPhone}). يرجى إبراز رسالة الـ SMS عند زيارة مركز فينينو للعناية بالسيارات لاستلام جائزتك.",
-            ], 422);
-        }
-
-        // Server-Side Deterministic Weighted RNG with Daily Cap Check
-        $todayWins = AdihexLead::whereDate('created_at', Carbon::today())
-            ->select('won_prize_tier', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
-            ->groupBy('won_prize_tier')
-            ->pluck('count', 'won_prize_tier')
-            ->toArray();
-
-        $activeWeights = [];
-        $overflowWeight = 0;
-        $discount20Index = 5;
-
-        foreach ($this->prizes as $idx => $prize) {
-            $prizeId = $prize['id'];
-            $limit = $prize['daily_limit'] ?? 50;
-            $wonToday = $todayWins[$prizeId] ?? 0;
-
-            if ($wonToday >= $limit && $prizeId !== 'discount_20') {
-                $overflowWeight += $prize['weight'];
-                $activeWeights[$idx] = 0;
-            } else {
-                $activeWeights[$idx] = $prize['weight'];
-            }
-
-            if ($prizeId === 'discount_20') {
-                $discount20Index = $idx;
-            }
-        }
-
-        // Add overflow weight from reached daily caps to 20% Off All Services
-        $activeWeights[$discount20Index] += $overflowWeight;
-
-        $winningIndex = $this->calculateWeightedRandom($activeWeights);
-        $wonPrize = $this->prizes[$winningIndex];
-
-        // Generate Unique Alphanumeric Voucher Code
-        do {
-            $voucherCode = 'VEN-ADIHEX-' . rand(1000, 9999);
-        } while (AdihexLead::where('voucher_code', $voucherCode)->exists());
-
-        // Determine Initial Lead Classification
-        $serviceIntent = $validated['service_intent'] ?? [];
-        $leadTier = 'SPIN_PRIZE';
-        if (is_array($serviceIntent) && (in_array('PPF Protection', $serviceIntent) || in_array('Ceramic Coating', $serviceIntent))) {
-            $leadTier = 'HIGH_INTENT_PPF';
-        }
-
-        // Expiration: 60 days validity
-        $expiresAt = Carbon::now()->addDays(60);
-
-        // Store Lead in Database
-        $lead = AdihexLead::create([
-            'name' => $validated['name'],
-            'phone' => $normalizedPhone,
-            'email' => $validated['email'] ?? null,
-            'service_intent' => $serviceIntent,
-            'won_prize_tier' => $wonPrize['id'],
-            'won_prize_label' => $wonPrize['label_en'],
-            'voucher_code' => $voucherCode,
-            'voucher_expires_at' => $expiresAt,
-            'is_redeemed' => false,
-            'lead_tier' => $leadTier,
-            'deposit_status' => 'pending',
-            'locale' => $validated['locale'] ?? 'en',
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
-
-        // Instant SMS Dispatch: Send official voucher code & prize to phone right away
-        try {
-            $smsService = new \App\Services\SmsGlobalService();
-            $smsService->sendAdihexVoucherSms($lead);
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('[ADIHEX] Instant spin SMS dispatch failed: ' . $e->getMessage());
-        }
-
         return response()->json([
-            'success' => true,
-            'is_existing' => false,
-            'lead_id' => $lead->id,
-            'winning_prize_index' => $winningIndex,
-            'won_prize' => $wonPrize,
-            'voucher_code' => $voucherCode,
-            'voucher_expires_at' => $expiresAt->format('Y-m-d'),
-            'whatsapp_url' => $lead->getWhatsAppUrl(),
-        ]);
+            'success' => false,
+            'message' => 'The ADIHEX 2026 campaign has concluded. Prize spins and submissions are now closed.',
+        ], 410);
     }
 
     /**
-     * Handle Show Package Reservation (AED 500 or Skip)
+     * ADIHEX Campaign is concluded. Public reservation endpoint is closed.
      */
     public function reserve(Request $request)
     {
-        $validated = $request->validate([
-            'lead_id' => 'required|exists:adihex_leads,id',
-            'package_id' => 'required|string',
-            'action' => 'required|string|in:pay,skip',
-            'payment_method' => 'nullable|string',
-            'stripe_payment_id' => 'nullable|string',
-        ]);
-
-        $lead = AdihexLead::findOrFail($validated['lead_id']);
-
-        if ($validated['action'] === 'skip' || $validated['package_id'] === 'skip') {
-            $lead->update([
-                'deposit_status' => 'skipped',
-                'deposit_amount' => 0.00,
-            ]);
-
-            // Automated Step 7 Notifications (SMS & Email)
-            $this->dispatchStep7Notifications($lead);
-
-            return response()->json([
-                'success' => true,
-                'status' => 'skipped',
-                'lead' => $lead,
-                'whatsapp_url' => $lead->getWhatsAppUrl(),
-            ]);
-        }
-
-        // Lookup Package
-        $selectedPkg = collect($this->packages)->firstWhere('id', $validated['package_id']);
-        if (!$selectedPkg) {
-            $selectedPkg = $this->packages[2]; // Default Golden
-        }
-
-        $lead->update([
-            'selected_package_id' => $selectedPkg['id'],
-            'selected_package_name' => $selectedPkg['name_en'],
-            'package_price' => $selectedPkg['promo_price'],
-            'deposit_amount' => 500.00,
-            'deposit_status' => 'paid',
-            'lead_tier' => 'VIP_RESERVED',
-            'stripe_payment_id' => $validated['stripe_payment_id'] ?? ('pi_adihex_' . Str::random(16)),
-        ]);
-
-        // Automated Step 7 Notifications (SMS & Email)
-        $this->dispatchStep7Notifications($lead);
-
         return response()->json([
-            'success' => true,
-            'status' => 'paid',
-            'lead' => $lead,
-            'package' => $selectedPkg,
-            'whatsapp_url' => $lead->getWhatsAppUrl(),
-        ]);
+            'success' => false,
+            'message' => 'The ADIHEX 2026 campaign has concluded. Show package reservations are now closed.',
+        ], 410);
     }
 
     /**
-     * Dispatch Automated SMS & Email at Step 7
-     */
-    private function dispatchStep7Notifications(AdihexLead $lead): void
-    {
-        try {
-            // 1. Send SMS via SMSGlobal
-            $smsService = new \App\Services\SmsGlobalService();
-            $smsService->sendAdihexVoucherSms($lead);
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('[ADIHEX] Automated SMS dispatch failed: ' . $e->getMessage());
-        }
-
-        try {
-            // 2. Send Email via SMTP if customer provided email
-            if (!empty($lead->email)) {
-                \Illuminate\Support\Facades\Mail::to($lead->email)->send(new \App\Mail\AdihexVoucherMail($lead));
-            }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('[ADIHEX] Automated Email dispatch failed: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Create Real Stripe PaymentIntent for AED 500.00 Deposit
+     * ADIHEX Campaign is concluded. Payment intents are disabled.
      */
     public function createPaymentIntent(Request $request)
     {
-        $validated = $request->validate([
-            'lead_id' => 'required|exists:adihex_leads,id',
-            'package_id' => 'required|string',
-        ]);
-
-        $lead = AdihexLead::findOrFail($validated['lead_id']);
-        $selectedPkg = collect($this->packages)->firstWhere('id', $validated['package_id']) ?? $this->packages[0];
-
-        $stripeSecret = config('services.stripe.secret') ?: env('STRIPE_SECRET');
-        if (!$stripeSecret) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Stripe secret key is not configured.',
-            ], 500);
-        }
-
-        try {
-            \Stripe\Stripe::setApiKey($stripeSecret);
-
-            $paymentIntent = \Stripe\PaymentIntent::create([
-                'amount' => 50000, // 500.00 AED (in fils)
-                'currency' => 'aed',
-                'automatic_payment_methods' => [
-                    'enabled' => true,
-                ],
-                'metadata' => [
-                    'lead_id' => $lead->id,
-                    'customer_name' => $lead->name,
-                    'customer_phone' => $lead->phone,
-                    'package_id' => $selectedPkg['id'],
-                    'package_name' => $selectedPkg['name_en'],
-                    'campaign' => 'ADIHEX_2026',
-                ],
-                'description' => 'Veneno Auto Care - ADIHEX 2026 Reservation Deposit: ' . $selectedPkg['name_en'],
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'clientSecret' => $paymentIntent->client_secret,
-                'publishableKey' => config('services.stripe.key') ?: env('STRIPE_KEY'),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'success' => false,
+            'message' => 'The ADIHEX 2026 campaign has concluded. Online deposits are closed.',
+        ], 410);
     }
 
     /**
