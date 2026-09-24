@@ -32,5 +32,26 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access Denied: You do not have sufficient privileges to perform this action.',
+                ], 403);
+            }
+
+            if (auth()->check()) {
+                $user = auth()->user();
+                if ($user->hasRole('customer')) {
+                    return redirect()->route('customer.portal')->with('error', 'Access Denied: You do not have permission to access the Executive Dashboard.');
+                }
+                if ($user->hasRole('technician')) {
+                    return redirect()->route('technician.portal')->with('error', 'Access Denied: You do not have permission to access the Executive Dashboard.');
+                }
+            }
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Access Denied: Administrative credentials are required.',
+            ]);
+        });
     })->create();

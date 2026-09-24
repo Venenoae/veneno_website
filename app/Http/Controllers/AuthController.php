@@ -34,11 +34,20 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
-            if ($user->hasAnyRole(['super_admin', 'manager', 'technician', 'receptionist'])) {
+
+            if ($user->hasAnyRole(['super_admin', 'manager'])) {
                 return redirect()->intended(route('dashboard'));
             }
 
-            return redirect()->intended(route('customer.portal'));
+            if ($user->hasRole('technician')) {
+                return redirect()->intended(route('technician.portal'));
+            }
+
+            if ($user->hasRole('customer')) {
+                return redirect()->intended(route('customer.portal'));
+            }
+
+            return redirect()->intended(route('home'));
         }
 
         return back()->withErrors([
@@ -47,58 +56,11 @@ class AuthController extends Controller
     }
 
     /**
-     * Quick Demo Switcher login (Super Admin, Manager, Technician, Customer).
-     */
-    public function quickLogin(Request $request, string $role)
-    {
-        $emailMap = [
-            'admin' => 'admin@venenoautocare.com',
-            'manager' => 'manager@venenoautocare.com',
-            'technician' => 'marcus@venenoautocare.com',
-            'customer' => 'alex@example.com',
-        ];
-
-        $email = $emailMap[$role] ?? 'admin@venenoautocare.com';
-        $user = User::where('email', $email)->firstOrFail();
-
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        if ($role === 'customer') {
-            return redirect()->route('customer.portal');
-        } elseif ($role === 'technician') {
-            return redirect()->route('technician.portal');
-        }
-
-        return redirect()->route('dashboard');
-    }
-
-    /**
-     * Register customer.
+     * Public registration is strictly disabled.
      */
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'required|string|max:50',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'password' => Hash::make($request->password),
-            'loyalty_tier' => 'Silver',
-            'loyalty_points' => 100, // Welcome bonus
-        ]);
-
-        $user->assignRole('customer');
-
-        Auth::login($user);
-
-        return redirect()->route('customer.portal');
+        abort(403, 'Public registration is disabled. Staff and customer accounts are provisioned by administration.');
     }
 
     /**

@@ -1,8 +1,7 @@
 <script setup>
 import { ref } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
-import { X, ShieldCheck, UserCheck, Wrench, LayoutDashboard, Car, Lock, Mail, ArrowRight, Loader2 } from 'lucide-vue-next';
-import InternationalPhoneInput from './InternationalPhoneInput.vue';
+import { useForm } from '@inertiajs/vue3';
+import { X, Lock, Mail, Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-vue-next';
 
 const props = defineProps({
   isOpen: Boolean,
@@ -10,7 +9,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 
-const isRegisterMode = ref(false);
+const showPassword = ref(false);
 
 const loginForm = useForm({
   email: '',
@@ -18,232 +17,116 @@ const loginForm = useForm({
   remember: true,
 });
 
-const registerForm = useForm({
-  name: '',
-  email: '',
-  phone: '',
-  password: '',
-  password_confirmation: '',
-});
-
 const handleLogin = () => {
   loginForm.post(route('login'), {
     onSuccess: () => emit('close'),
   });
 };
-
-const handleRegister = () => {
-  registerForm.post(route('register'), {
-    onSuccess: () => emit('close'),
-  });
-};
-
-const handleQuickLogin = (role) => {
-  window.location.href = route('quick-login', role);
-};
 </script>
 
 <template>
   <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-    <div class="w-full max-w-md glass-panel rounded-3xl border border-zinc-800 shadow-2xl p-6 relative animate-in fade-in zoom-in-95 duration-200">
+    <div class="w-full max-w-md bg-[#121216]/95 border-2 border-[#c5a059]/40 shadow-[0_0_60px_rgba(0,0,0,0.8)] rounded-3xl p-6 sm:p-8 relative animate-in fade-in zoom-in-95 duration-200">
       
       <!-- Close Button -->
       <button
+        type="button"
         @click="emit('close')"
-        class="absolute top-5 right-5 p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+        class="absolute top-5 right-5 p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
       >
         <X class="w-5 h-5" />
       </button>
 
       <!-- Header -->
-      <div class="text-center mb-6">
+      <div class="text-center mb-6 pt-1">
         <img 
           src="/images/logo.png" 
           alt="Veneno Auto Care" 
           title="Veneno Auto Care" 
-          class="h-11 w-auto mx-auto object-contain mb-3" 
+          class="h-12 w-auto mx-auto object-contain mb-3" 
         />
-        <p class="text-xs text-zinc-400">Sign in to access VIP Garage, Technician Bay, or Management CRM</p>
-      </div>
-
-      <!-- Quick Demo Switcher Panel -->
-      <div class="mb-6 p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-2">
-        <div class="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-bold flex items-center justify-between">
-          <span>⚡ One-Click Demo Role Switcher</span>
-          <span class="text-red-400">Instant Access</span>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <button
-            @click="handleQuickLogin('admin')"
-            class="p-2.5 rounded-xl bg-zinc-950/80 hover:bg-red-950/40 border border-zinc-800 hover:border-red-500/50 text-left transition-all group"
-          >
-            <div class="flex items-center gap-1.5 text-xs font-bold text-white group-hover:text-red-400">
-              <LayoutDashboard class="w-3.5 h-3.5 text-red-500" />
-              <span>Super Admin</span>
-            </div>
-            <div class="text-[10px] text-zinc-500">Full CRM & Revenue</div>
-          </button>
-
-          <button
-            @click="handleQuickLogin('manager')"
-            class="p-2.5 rounded-xl bg-zinc-950/80 hover:bg-blue-950/40 border border-zinc-800 hover:border-blue-500/50 text-left transition-all group"
-          >
-            <div class="flex items-center gap-1.5 text-xs font-bold text-white group-hover:text-blue-400">
-              <UserCheck class="w-3.5 h-3.5 text-blue-400" />
-              <span>Operations Manager</span>
-            </div>
-            <div class="text-[10px] text-zinc-500">Staff & Campaigns</div>
-          </button>
-
-          <button
-            @click="handleQuickLogin('technician')"
-            class="p-2.5 rounded-xl bg-zinc-950/80 hover:bg-amber-950/40 border border-zinc-800 hover:border-amber-500/50 text-left transition-all group"
-          >
-            <div class="flex items-center gap-1.5 text-xs font-bold text-white group-hover:text-amber-400">
-              <Wrench class="w-3.5 h-3.5 text-amber-400" />
-              <span>Lead Technician</span>
-            </div>
-            <div class="text-[10px] text-zinc-500">Live Bay Workflow</div>
-          </button>
-
-          <button
-            @click="handleQuickLogin('customer')"
-            class="p-2.5 rounded-xl bg-zinc-950/80 hover:bg-emerald-950/40 border border-zinc-800 hover:border-emerald-500/50 text-left transition-all group"
-          >
-            <div class="flex items-center gap-1.5 text-xs font-bold text-white group-hover:text-emerald-400">
-              <Car class="w-3.5 h-3.5 text-emerald-400" />
-              <span>VIP Client</span>
-            </div>
-            <div class="text-[10px] text-zinc-500">Alex Sterling (Porsche)</div>
-          </button>
-        </div>
-      </div>
-
-      <!-- Mode Switcher -->
-      <div class="flex border-b border-zinc-800 mb-4 text-xs font-semibold">
-        <button
-          @click="isRegisterMode = false"
-          class="flex-1 py-2 text-center transition-colors border-b-2"
-          :class="!isRegisterMode ? 'text-red-500 border-red-500' : 'text-zinc-400 border-transparent hover:text-zinc-200'"
-        >
-          Sign In
-        </button>
-        <button
-          @click="isRegisterMode = true"
-          class="flex-1 py-2 text-center transition-colors border-b-2"
-          :class="isRegisterMode ? 'text-red-500 border-red-500' : 'text-zinc-400 border-transparent hover:text-zinc-200'"
-        >
-          Create VIP Account
-        </button>
+        <h2 class="text-base font-black tracking-wider uppercase text-white font-mono">
+          Client & Staff Portal
+        </h2>
+        <p class="text-xs text-zinc-400 mt-1">Sign in with your authorized credentials to access your portal</p>
       </div>
 
       <!-- Login Form -->
-      <form v-if="!isRegisterMode" @submit.prevent="handleLogin" class="space-y-3.5 text-xs">
+      <form @submit.prevent="handleLogin" class="space-y-4 text-xs">
         <div>
-          <label class="block text-zinc-400 mb-1">Email Address</label>
+          <label class="block text-zinc-300 font-bold mb-1.5 uppercase tracking-wider font-mono text-[11px]">Email Address</label>
           <div class="relative">
-            <Mail class="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+            <Mail class="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
             <input
               v-model="loginForm.email"
               type="email"
               required
-              placeholder="admin@venenoautocare.com"
-              class="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-red-500"
+              autocomplete="email"
+              placeholder="name@veneno.ae"
+              class="w-full pl-10 pr-3.5 py-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-[#c5a059] focus:ring-1 focus:ring-[#c5a059] transition-all text-sm"
             />
           </div>
-          <div v-if="loginForm.errors.email" class="text-red-400 text-[11px] mt-1">{{ loginForm.errors.email }}</div>
+          <div v-if="loginForm.errors.email" class="text-red-400 text-xs font-medium mt-1.5 pl-1">
+            {{ loginForm.errors.email }}
+          </div>
         </div>
 
         <div>
-          <label class="block text-zinc-400 mb-1">Password</label>
+          <label class="block text-zinc-300 font-bold mb-1.5 uppercase tracking-wider font-mono text-[11px]">Password</label>
           <div class="relative">
-            <Lock class="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+            <Lock class="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
             <input
               v-model="loginForm.password"
-              type="password"
+              :type="showPassword ? 'text' : 'password'"
               required
-              placeholder="••••••••"
-              class="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-red-500"
+              autocomplete="current-password"
+              placeholder="••••••••••••"
+              class="w-full pl-10 pr-11 py-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-[#c5a059] focus:ring-1 focus:ring-[#c5a059] transition-all text-sm"
             />
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+            >
+              <EyeOff v-if="showPassword" class="w-4 h-4" />
+              <Eye v-else class="w-4 h-4" />
+            </button>
           </div>
+          <div v-if="loginForm.errors.password" class="text-red-400 text-xs font-medium mt-1.5 pl-1">
+            {{ loginForm.errors.password }}
+          </div>
+        </div>
+
+        <!-- Remember Me Checkbox -->
+        <div class="flex items-center justify-between pt-1">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              v-model="loginForm.remember"
+              type="checkbox"
+              class="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-red-600 focus:ring-red-500 focus:ring-offset-0"
+            />
+            <span class="text-xs text-zinc-400 hover:text-zinc-300">Keep me signed in</span>
+          </label>
         </div>
 
         <button
           type="submit"
           :disabled="loginForm.processing"
-          class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+          class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-red-600 via-[#c5a059] to-red-600 hover:brightness-110 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-red-950/50 flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
         >
           <Loader2 v-if="loginForm.processing" class="w-4 h-4 animate-spin" />
-          <span>Sign In</span>
+          <span>Authenticate & Access Portal</span>
         </button>
       </form>
 
-      <!-- Register Form -->
-      <form v-else @submit.prevent="handleRegister" class="space-y-3 text-xs">
-        <div>
-          <label class="block text-zinc-400 mb-1">Full Name</label>
-          <input
-            v-model="registerForm.name"
-            type="text"
-            required
-            placeholder="John Doe"
-            class="w-full px-3.5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white focus:outline-none focus:border-red-500"
-          />
+      <!-- Footer Info -->
+      <div class="pt-5 mt-4 border-t border-zinc-800/80 flex items-center justify-between text-[11px] font-mono text-zinc-500">
+        <span>Veneno Auto Care Center</span>
+        <div class="flex items-center gap-1 text-[#c5a059]">
+          <ShieldCheck class="w-3.5 h-3.5" />
+          <span>256-bit Encrypted</span>
         </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-zinc-400 mb-1">Email</label>
-            <input
-              v-model="registerForm.email"
-              type="email"
-              required
-              placeholder="john@example.com"
-              class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white focus:outline-none focus:border-red-500 text-xs"
-            />
-          </div>
-          <div>
-            <label class="block text-zinc-400 mb-1">Phone Number</label>
-            <InternationalPhoneInput
-              v-model="registerForm.phone"
-              :required="true"
-              input-class="text-xs"
-            />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-zinc-400 mb-1">Password</label>
-            <input
-              v-model="registerForm.password"
-              type="password"
-              required
-              placeholder="••••••••"
-              class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white focus:outline-none focus:border-red-500 text-xs"
-            />
-          </div>
-          <div>
-            <label class="block text-zinc-400 mb-1">Confirm</label>
-            <input
-              v-model="registerForm.password_confirmation"
-              type="password"
-              required
-              placeholder="••••••••"
-              class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white focus:outline-none focus:border-red-500 text-xs"
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          :disabled="registerForm.processing"
-          class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-600/30 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-        >
-          <Loader2 v-if="registerForm.processing" class="w-4 h-4 animate-spin" />
-          <span>Register & Claim 100 VIP Points</span>
-        </button>
-      </form>
+      </div>
 
     </div>
   </div>

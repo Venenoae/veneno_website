@@ -67,47 +67,55 @@ Route::get('/{locale}/services/{slug}', [StorefrontController::class, 'serviceDe
 Route::post('/api/quote', [StorefrontController::class, 'submitQuote'])->name('api.quote.submit');
 Route::post('/api/inquiries', [StorefrontController::class, 'storeInquiry'])->name('api.inquiries.store');
 
-// ADIHEX 2026 Activation APIs
+// ADIHEX 2026 Activation APIs (Public)
 Route::post('/api/adihex/spin', [AdihexController::class, 'spin'])->name('api.adihex.spin');
 Route::post('/api/adihex/reserve', [AdihexController::class, 'reserve'])->name('api.adihex.reserve');
 Route::post('/api/adihex/payment-intent', [AdihexController::class, 'createPaymentIntent'])->name('api.adihex.payment-intent');
-Route::post('/api/adihex/redeem', [AdihexController::class, 'redeemVoucher'])->name('api.adihex.redeem');
 
-// Hammer Challenge APIs
+// Hammer Challenge Public Participant APIs
 Route::post('/api/hammer-challenge/register', [HammerChallengeController::class, 'register'])->name('api.hammer-challenge.register');
 Route::get('/api/hammer-challenge/confirmation/{token}', [HammerChallengeController::class, 'confirmationData'])->name('api.hammer-challenge.confirmation');
 Route::post('/api/hammer-challenge/audience', [HammerChallengeController::class, 'registerAudience'])->name('api.hammer-challenge.audience');
 Route::get('/api/hammer-challenge/audience/confirmation/{token}', [HammerChallengeController::class, 'audienceConfirmationData'])->name('api.hammer-challenge.audience.confirmation');
-Route::get('/api/hammer-challenge/raffle/participants', [HammerChallengeController::class, 'getRaffleParticipants'])->name('api.hammer-challenge.raffle.participants');
-Route::post('/api/hammer-challenge/raffle/draw', [HammerChallengeController::class, 'drawRaffleWinner'])->name('api.hammer-challenge.raffle.draw');
-Route::post('/api/hammer-challenge/raffle/reset', [HammerChallengeController::class, 'resetRaffleWinners'])->name('api.hammer-challenge.raffle.reset');
-Route::post('/api/hammer-challenge/raffle/{audience}/send-sms', [HammerChallengeController::class, 'sendRaffleWinnerSms'])->name('api.hammer-challenge.raffle.send-sms');
 
 // Booking Engine
 Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
 Route::get('/confirmation/{bookingCode}', [BookingController::class, 'confirmation'])->name('bookings.confirmation');
 
-// Authentication Routes
+// Authentication Routes (Login Only - Public Registration Strictly Disabled)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register'])->name('register');
 });
+
+// Explicitly Block & Defend /register Against Unauthorized Account Creation
+Route::any('/register', function () {
+    if (request()->expectsJson()) {
+        return response()->json(['message' => 'Public registration is disabled.'], 403);
+    }
+    return redirect()->route('login')->withErrors([
+        'email' => 'Public registration is disabled. Staff and customer accounts are provisioned by administration.',
+    ]);
+})->name('register');
 
 // Logout (Authenticated)
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 // Protected Portals & Dashboard CRM
 Route::middleware(['auth'])->group(function () {
-    // Customer VIP Portal
-    Route::get('/customer-portal', [CustomerPortalController::class, 'index'])->name('customer.portal');
+    // Customer VIP Portal (Restricted to Customers & Management)
+    Route::middleware(['role:super_admin|manager|customer'])->group(function () {
+        Route::get('/customer-portal', [CustomerPortalController::class, 'index'])->name('customer.portal');
+    });
 
-    // Technician Portal (Bay Floor)
-    Route::get('/technician-portal', [TechnicianPortalController::class, 'index'])->name('technician.portal');
-    Route::post('/technician/bookings/{booking}/stage', [TechnicianPortalController::class, 'updateStage'])->name('technician.bookings.stage');
+    // Technician Portal (Restricted to Bay Floor Staff & Management)
+    Route::middleware(['role:super_admin|manager|technician'])->group(function () {
+        Route::get('/technician-portal', [TechnicianPortalController::class, 'index'])->name('technician.portal');
+        Route::post('/technician/bookings/{booking}/stage', [TechnicianPortalController::class, 'updateStage'])->name('technician.bookings.stage');
+    });
 
-    // Admin & Operations Management Dashboard CRM
-    Route::prefix('dashboard')->group(function () {
+    // Admin & Operations Management Dashboard CRM (Strictly Super Admin & Manager)
+    Route::middleware(['role:super_admin|manager'])->prefix('dashboard')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/raffle', [HammerChallengeController::class, 'raffle'])->name('dashboard.raffle');
         Route::patch('/inquiries/{inquiry}', [DashboardController::class, 'updateInquiryStatus'])->name('dashboard.inquiries.update');
@@ -119,8 +127,21 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/hammer-challenge/audience/{audience}/status', [DashboardController::class, 'updateHammerAudienceStatus'])->name('dashboard.hammer-challenge.audience.status');
         Route::post('/hammer-challenge/audience/{audience}/send-sms', [DashboardController::class, 'sendHammerWinnerSms'])->name('dashboard.hammer-challenge.audience.send-sms');
         Route::get('/hammer-challenge/audience/export', [DashboardController::class, 'exportHammerAudience'])->name('dashboard.hammer-challenge.audience.export');
+
+        // Self Password Change (Requires current_password verification)
         Route::post('/change-password', [DashboardController::class, 'changePassword'])->name('dashboard.password.change');
-        Route::post('/users/{user}/reset-password', [DashboardController::class, 'resetUserPassword'])->name('dashboard.users.reset-password');
+
+        // Staff Password Reset (Strictly Super Admin ONLY - Cannot target Super Admins)
+        Route::middleware(['role:super_admin'])->post('/users/{user}/reset-password', [DashboardController::class, 'resetUserPassword'])->name('dashboard.users.reset-password');
+    });
+
+    // Authenticated Management Actions for ADIHEX & Hammer Challenge
+    Route::middleware(['role:super_admin|manager'])->group(function () {
+        Route::post('/api/adihex/redeem', [AdihexController::class, 'redeemVoucher'])->name('api.adihex.redeem');
+        Route::get('/api/hammer-challenge/raffle/participants', [HammerChallengeController::class, 'getRaffleParticipants'])->name('api.hammer-challenge.raffle.participants');
+        Route::post('/api/hammer-challenge/raffle/draw', [HammerChallengeController::class, 'drawRaffleWinner'])->name('api.hammer-challenge.raffle.draw');
+        Route::post('/api/hammer-challenge/raffle/reset', [HammerChallengeController::class, 'resetRaffleWinners'])->name('api.hammer-challenge.raffle.reset');
+        Route::post('/api/hammer-challenge/raffle/{audience}/send-sms', [HammerChallengeController::class, 'sendRaffleWinnerSms'])->name('api.hammer-challenge.raffle.send-sms');
     });
 });
 

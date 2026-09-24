@@ -23,11 +23,19 @@ class DashboardController extends Controller
      */
     public function index(Request $request): Response
     {
+        $currentUser = $request->user();
+        if (!$currentUser || !$currentUser->hasAnyRole(['super_admin', 'manager'])) {
+            abort(403, 'Access Denied: Executive dashboard is restricted to administrators and operations managers.');
+        }
+
         $adihexLeads = AdihexLead::latest()->get();
         $inquiries = Inquiry::latest()->get();
         $hammerRegistrations = HammerChallengeRegistration::latest()->get();
         $hammerAudiences = HammerAudienceRegistration::latest()->get();
-        $users = User::with('roles')->latest()->get()->map(function ($u) {
+
+        // Only expose user management records to Super Admins
+        $isSuperAdmin = $currentUser->hasRole('super_admin');
+        $users = $isSuperAdmin ? User::with('roles')->latest()->get()->map(function ($u) {
             return [
                 'id' => $u->id,
                 'name' => $u->name,
@@ -37,7 +45,7 @@ class DashboardController extends Controller
                 'loyalty_tier' => $u->loyalty_tier,
                 'created_at' => $u->created_at?->format('Y-m-d H:i'),
             ];
-        });
+        }) : [];
 
         // ADIHEX 2026 Campaign KPIs
         $adihexTotalSpins = $adihexLeads->count();
@@ -116,7 +124,8 @@ class DashboardController extends Controller
     public function changePassword(Request $request)
     {
         $request->validate([
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         /** @var \App\Models\User $user */
@@ -129,12 +138,29 @@ class DashboardController extends Controller
     }
 
     /**
-     * Reset specific staff member's password.
+     * Reset specific staff member's password (Super Admin Only).
      */
     public function resetUserPassword(Request $request, User $user)
     {
+        $currentUser = Auth::user();
+
+        // 1. Strict Super Admin Check
+        if (!$currentUser || !$currentUser->hasRole('super_admin')) {
+            abort(403, 'Unauthorized. Only Super Administrators can reset account passwords.');
+        }
+
+        // 2. Prevent resetting any Super Admin account via staff management
+        if ($user->hasRole('super_admin')) {
+            abort(403, 'Security Policy: Super Administrator accounts cannot be reset through staff management.');
+        }
+
+        // 3. Prohibit self-reset via this route (must use changePassword with current_password)
+        if ($user->id === $currentUser->id) {
+            abort(400, 'Please use the "My Password" tab to change your own credentials.');
+        }
+
         $request->validate([
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         $user->update([

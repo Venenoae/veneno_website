@@ -345,8 +345,10 @@ const isSecurityModalOpen = ref(false);
 const securityModalTab = ref('my_password'); // 'my_password' | 'staff_accounts'
 
 // My Password State
+const currentPassword = ref('');
 const myPassword = ref('');
 const myPasswordConfirm = ref('');
+const showCurrentPassword = ref(false);
 const showMyPassword = ref(false);
 const myPasswordProcessing = ref(false);
 const myPasswordError = ref(null);
@@ -356,16 +358,20 @@ const handleChangeMyPassword = () => {
   myPasswordError.value = null;
   myPasswordSuccess.value = null;
 
+  if (!currentPassword.value) {
+    myPasswordError.value = 'Please enter your current password.';
+    return;
+  }
   if (!myPassword.value) {
     myPasswordError.value = 'Please enter a new password.';
     return;
   }
-  if (myPassword.value.length < 6) {
-    myPasswordError.value = 'Password must be at least 6 characters.';
+  if (myPassword.value.length < 8) {
+    myPasswordError.value = 'New password must be at least 8 characters.';
     return;
   }
   if (myPassword.value !== myPasswordConfirm.value) {
-    myPasswordError.value = 'Passwords do not match.';
+    myPasswordError.value = 'New passwords do not match.';
     return;
   }
 
@@ -373,19 +379,21 @@ const handleChangeMyPassword = () => {
   router.post(
     route('dashboard.password.change'),
     {
+      current_password: currentPassword.value,
       password: myPassword.value,
       password_confirmation: myPasswordConfirm.value,
     },
     {
       preserveScroll: true,
       onSuccess: () => {
+        currentPassword.value = '';
         myPassword.value = '';
         myPasswordConfirm.value = '';
         myPasswordSuccess.value = 'Your password has been changed successfully!';
         myPasswordProcessing.value = false;
       },
       onError: (errors) => {
-        myPasswordError.value = errors.password || Object.values(errors)[0] || 'Failed to update password.';
+        myPasswordError.value = errors.current_password || errors.password || Object.values(errors)[0] || 'Failed to update password.';
         myPasswordProcessing.value = false;
       },
       onFinish: () => {
@@ -420,6 +428,10 @@ const filteredStaffUsers = computed(() => {
 });
 
 const openStaffPasswordReset = (user) => {
+  if (user.role === 'super_admin') {
+    staffResetError.value = 'Super Administrator accounts are protected and cannot be reset through staff management.';
+    return;
+  }
   selectedStaffUser.value = user;
   staffNewPassword.value = '';
   staffNewPasswordConfirm.value = '';
@@ -432,12 +444,17 @@ const handleResetStaffPassword = () => {
   staffResetError.value = null;
   staffResetSuccess.value = null;
 
+  if (selectedStaffUser.value.role === 'super_admin') {
+    staffResetError.value = 'Super Administrator credentials cannot be overwritten via staff management.';
+    return;
+  }
+
   if (!staffNewPassword.value) {
     staffResetError.value = 'Please enter a new password for this staff account.';
     return;
   }
-  if (staffNewPassword.value.length < 6) {
-    staffResetError.value = 'Password must be at least 6 characters.';
+  if (staffNewPassword.value.length < 8) {
+    staffResetError.value = 'Password must be at least 8 characters.';
     return;
   }
   if (staffNewPassword.value !== staffNewPasswordConfirm.value) {
@@ -1764,6 +1781,7 @@ const handleLogout = () => {
           </button>
 
           <button
+            v-if="authUser.role === 'super_admin'"
             type="button"
             @click="securityModalTab = 'staff_accounts'"
             class="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
@@ -1807,10 +1825,36 @@ const handleLogout = () => {
 
           <!-- Password Inputs -->
           <form @submit.prevent="handleChangeMyPassword" class="space-y-4">
+            <!-- Current Password Verification -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-mono text-zinc-300 flex items-center justify-between">
+                <span>Current Password</span>
+                <span class="text-[10px] text-amber-400/90 font-bold">Required for verification</span>
+              </label>
+              <div class="relative">
+                <input
+                  :type="showCurrentPassword ? 'text' : 'password'"
+                  v-model="currentPassword"
+                  placeholder="Enter your current password"
+                  class="w-full pl-10 pr-10 py-3 rounded-2xl bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs font-mono focus:outline-none focus:border-amber-500 transition-colors"
+                  required
+                />
+                <Lock class="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
+                <button
+                  type="button"
+                  @click="showCurrentPassword = !showCurrentPassword"
+                  class="absolute right-3.5 top-3.5 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                >
+                  <EyeOff v-if="showCurrentPassword" class="w-4 h-4" />
+                  <Eye v-else class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
             <div class="space-y-1.5">
               <label class="text-xs font-mono text-zinc-300 flex items-center justify-between">
                 <span>New Password</span>
-                <span class="text-[10px] text-zinc-500">Min. 6 characters</span>
+                <span class="text-[10px] text-zinc-500">Min. 8 characters</span>
               </label>
               <div class="relative">
                 <input
@@ -1848,9 +1892,9 @@ const handleLogout = () => {
 
             <!-- Password Requirements Hint -->
             <div class="flex items-center gap-4 text-[11px] font-mono text-zinc-500 pt-1">
-              <div class="flex items-center gap-1.5" :class="myPassword.length >= 6 ? 'text-emerald-400 font-bold' : ''">
+              <div class="flex items-center gap-1.5" :class="myPassword.length >= 8 ? 'text-emerald-400 font-bold' : ''">
                 <Check class="w-3.5 h-3.5" />
-                <span>At least 6 characters</span>
+                <span>At least 8 characters</span>
               </div>
               <div class="flex items-center gap-1.5" :class="myPassword && myPassword === myPasswordConfirm ? 'text-emerald-400 font-bold' : ''">
                 <Check class="w-3.5 h-3.5" />
@@ -1860,7 +1904,7 @@ const handleLogout = () => {
 
             <button
               type="submit"
-              :disabled="myPasswordProcessing || !myPassword || myPassword !== myPasswordConfirm"
+              :disabled="myPasswordProcessing || !currentPassword || !myPassword || myPassword.length < 8 || myPassword !== myPasswordConfirm"
               class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-red-600 to-amber-600 hover:brightness-110 disabled:opacity-50 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-red-950/60 transition-all cursor-pointer active:scale-98"
             >
               <RefreshCw v-if="myPasswordProcessing" class="w-4 h-4 animate-spin" />
@@ -2002,7 +2046,16 @@ const handleLogout = () => {
                   {{ user.role }}
                 </span>
 
+                <span
+                  v-if="user.role === 'super_admin'"
+                  class="px-2.5 py-1 rounded-lg bg-red-950/60 text-red-300 border border-red-800/40 text-[10px] font-mono font-bold flex items-center gap-1.5 select-none"
+                >
+                  <ShieldCheck class="w-3 h-3 text-red-400" />
+                  <span>Protected Admin</span>
+                </span>
+
                 <button
+                  v-else
                   type="button"
                   @click="openStaffPasswordReset(user)"
                   class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-blue-600 text-zinc-300 hover:text-white border border-zinc-700 text-xs font-mono font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
