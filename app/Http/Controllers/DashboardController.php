@@ -6,6 +6,7 @@ use App\Models\AdihexLead;
 use App\Models\HammerChallengeRegistration;
 use App\Models\HammerAudienceRegistration;
 use App\Models\Inquiry;
+use App\Models\NewsEvent;
 use App\Models\User;
 use App\Services\SmsGlobalService;
 use Illuminate\Http\JsonResponse;
@@ -32,6 +33,7 @@ class DashboardController extends Controller
         $inquiries = Inquiry::latest()->get();
         $hammerRegistrations = HammerChallengeRegistration::latest()->get();
         $hammerAudiences = HammerAudienceRegistration::latest()->get();
+        $newsEvents = NewsEvent::with('creator')->latest()->get();
 
         // Only expose user management records to Super Admins
         $isSuperAdmin = $currentUser->hasRole('super_admin');
@@ -71,6 +73,7 @@ class DashboardController extends Controller
             'inquiries' => $inquiries,
             'hammerRegistrations' => $hammerRegistrations,
             'hammerAudiences' => $hammerAudiences,
+            'newsEvents' => $newsEvents,
             'users' => $users,
             'adihexStats' => [
                 'totalSpins' => $adihexTotalSpins,

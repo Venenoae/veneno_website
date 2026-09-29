@@ -72,31 +72,6 @@ const openQuoteWithService = (serviceName) => {
 const getServiceUrl = (slug) => {
   return currentLocale.value === 'ar' ? `/ar/services/${slug}` : `/services/${slug}`;
 };
-
-// Synchronized Live Countdown for Hammer Challenge
-const hammerCountdown = ref({ days: '00', hours: '00', minutes: '00', seconds: '00' });
-let countdownTimer = null;
-
-const calculateCountdown = () => {
-  const pad = (n) => String(n).padStart(2, '0');
-  const hammerTarget = new Date('2026-09-12T17:00:00+04:00').getTime();
-  const hammerDiff = Math.max(0, hammerTarget - Date.now());
-  hammerCountdown.value = {
-    days: pad(Math.floor(hammerDiff / (1000 * 60 * 60 * 24))),
-    hours: pad(Math.floor((hammerDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))),
-    minutes: pad(Math.floor((hammerDiff % (1000 * 60 * 60)) / (1000 * 60))),
-    seconds: pad(Math.floor((hammerDiff % (1000 * 60)) / 1000)),
-  };
-};
-
-onMounted(() => {
-  calculateCountdown();
-  countdownTimer = setInterval(calculateCountdown, 1000);
-});
-
-onUnmounted(() => {
-  if (countdownTimer) clearInterval(countdownTimer);
-});
 </script>
 
 <template>
@@ -205,27 +180,6 @@ onUnmounted(() => {
             <span class="font-medium tracking-wide">{{ t('hero.exploreScroll') }}</span>
             <ChevronDown class="w-3.5 h-3.5 text-red-500 group-hover:translate-y-0.5 transition-transform" />
           </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- HAMMER CHALLENGE FEATURED EVENT CAMPAIGN -->
-    <section class="relative overflow-hidden border-b border-zinc-800/80 bg-gradient-to-b from-[#070709] via-[#0d0d12] to-[#070709] py-10 sm:py-16">
-      <div class="pointer-events-none absolute left-1/2 top-0 h-[350px] w-[900px] -translate-x-1/2 bg-gradient-to-b from-red-600/15 via-amber-500/10 to-transparent blur-3xl"></div>
-      <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:24px_24px] opacity-20"></div>
-      <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="relative overflow-hidden rounded-3xl border-2 border-amber-500/30 bg-gradient-to-b from-zinc-900/90 via-zinc-950/95 to-black p-5 shadow-2xl shadow-black/90 sm:p-8 lg:p-10">
-          <div class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent"></div>
-          <div class="grid items-center gap-8 lg:grid-cols-12 lg:gap-10">
-            <div class="space-y-5 text-center lg:col-span-7 lg:text-left">
-              <div class="flex flex-wrap items-center justify-center gap-2.5 lg:justify-start"><span class="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/15 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-300"><Flame class="h-3.5 w-3.5 text-amber-400" /> {{ t('hammer.eventSeries') }}</span><span class="inline-flex items-center gap-1.5 rounded-full border border-zinc-700/80 bg-zinc-900 px-3 py-1.5 text-xs font-mono text-zinc-300"><MapPin class="h-3.5 w-3.5 text-red-500" /> {{ t('hammer.venue') }}</span></div>
-              <div><h2 class="font-display text-3xl font-bold uppercase leading-tight tracking-tight text-white sm:text-5xl">{{ t('hammer.title') }}<br /><span class="bg-gradient-to-r from-amber-400 via-amber-200 to-red-500 bg-clip-text text-transparent">{{ t('hammer.final') }}</span></h2><p class="mt-3 text-xs font-mono uppercase tracking-wider text-zinc-400">{{ t('hammer.date') }}</p></div>
-              <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3"><div class="rounded-2xl border border-zinc-800/80 bg-zinc-950/70 p-3 text-left rtl:text-right col-span-2 sm:col-span-2"><p class="text-[10px] font-mono uppercase text-zinc-500">{{ t('hammer.timing') }}</p><p class="mt-1 text-sm font-bold text-white font-mono">5:00 PM – 10:00 PM</p></div><div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-left rtl:text-right col-span-2 sm:col-span-1"><p class="text-[10px] font-mono uppercase text-amber-300">{{ t('hammer.firstPrize') }}</p><p class="mt-1 text-sm font-black text-white">AED 15,000</p></div></div>
-              <div class="rounded-2xl border border-amber-500/30 bg-zinc-950/90 p-4 text-center shadow-xl"><div class="flex items-center justify-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-amber-400"><Clock class="h-3.5 w-3.5" /> {{ t('hammer.countdown') }}</div><div class="mt-3 grid grid-cols-4 gap-2"><div v-for="unit in [{ key: 'days', label: t('hammer.days') }, { key: 'hours', label: t('hammer.hours') }, { key: 'minutes', label: t('hammer.minutes') }, { key: 'seconds', label: t('hammer.seconds') }]" :key="unit.key" class="rounded-xl border border-zinc-800 bg-zinc-900 p-2.5"><div class="font-mono text-lg font-bold text-amber-300">{{ hammerCountdown[unit.key] }}</div><div class="text-[9px] font-mono uppercase text-zinc-500">{{ unit.label }}</div></div></div></div>
-              <div class="flex flex-wrap items-center justify-center gap-3 lg:justify-start"><Link href="/hammer-challenge/register" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-600 px-5 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-red-950/50 transition hover:brightness-110 sm:w-auto">{{ t('hammer.register') }} <ArrowUpRight class="h-4 w-4" /></Link><Link href="/hammer-challenge/terms" class="text-xs font-semibold text-zinc-400 underline underline-offset-4 hover:text-amber-300">{{ t('hammer.terms') }}</Link></div>
-            </div>
-            <div class="flex flex-col gap-4 lg:col-span-5"><div class="rounded-2xl border border-zinc-800 bg-zinc-950/90 p-4 text-center shadow-xl"><div class="flex items-center justify-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-amber-400"><Trophy class="h-3.5 w-3.5" /> {{ t('hammer.prizePodium') }}</div><div class="mt-4 border-b border-amber-500/20 pb-4"><p class="text-[10px] font-mono uppercase text-amber-300">{{ t('hammer.firstCash') }}</p><p class="mt-1 text-4xl font-black text-white">AED 15,000</p></div></div><div class="relative min-h-[260px] overflow-hidden rounded-2xl border border-amber-500/35 bg-zinc-950/80 p-3 shadow-xl sm:min-h-[320px]"><div class="absolute inset-3 border border-amber-500/15"></div><picture class="relative flex h-full min-h-[235px] items-center justify-center sm:min-h-[295px]"><source media="(max-width: 639px)" srcset="/images/hammer/Hammer3.jpeg" /><img src="/images/hammer/Hammer1.jpeg" alt="Veneno Hammer Challenge campaign artwork" class="h-full max-h-[330px] w-full object-cover drop-shadow-[0_18px_35px_rgba(239,68,68,0.14)]" /></picture><div class="pointer-events-none absolute bottom-5 left-5 text-[9px] font-mono uppercase tracking-[0.2em] text-amber-300/80"></div></div></div>
-          </div>
         </div>
       </div>
     </section>

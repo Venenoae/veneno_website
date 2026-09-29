@@ -40,7 +40,14 @@ import {
   EyeOff,
   User,
   ShieldAlert,
-  UserCheck
+  UserCheck,
+  Newspaper,
+  Plus,
+  Calendar,
+  Edit3,
+  Star,
+  Upload,
+  Tag
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -50,10 +57,11 @@ const props = defineProps({
   inquiryStats: { type: Object, default: () => ({}) },
   hammerRegistrations: { type: Array, default: () => [] },
   hammerAudiences: { type: Array, default: () => [] },
+  newsEvents: { type: Array, default: () => [] },
   users: { type: Array, default: () => [] },
 });
 
-const currentTab = ref('adihex'); // 'adihex' | 'hammer' | 'inquiries'
+const currentTab = ref('adihex'); // 'adihex' | 'hammer' | 'inquiries' | 'news'
 
 // ==========================================
 // ADIHEX 2026 CRM Filters & Search
@@ -509,6 +517,183 @@ const handleLogout = () => {
     router.post(route('logout'));
   }
 };
+
+// ==========================================
+// News & Events Management (Super Admin)
+// ==========================================
+const newsSearch = ref('');
+const newsTypeFilter = ref('all'); // 'all' | 'event' | 'news' | 'published' | 'draft'
+
+const filteredNewsList = computed(() => {
+  let list = props.newsEvents || [];
+
+  if (newsTypeFilter.value === 'event') {
+    list = list.filter(item => item.type === 'event');
+  } else if (newsTypeFilter.value === 'news') {
+    list = list.filter(item => item.type === 'news');
+  } else if (newsTypeFilter.value === 'published') {
+    list = list.filter(item => item.status === 'published');
+  } else if (newsTypeFilter.value === 'draft') {
+    list = list.filter(item => item.status === 'draft');
+  }
+
+  if (newsSearch.value.trim()) {
+    const q = newsSearch.value.toLowerCase();
+    list = list.filter(item =>
+      (item.title && item.title.toLowerCase().includes(q)) ||
+      (item.title_ar && item.title_ar.toLowerCase().includes(q)) ||
+      (item.category && item.category.toLowerCase().includes(q)) ||
+      (item.location && item.location.toLowerCase().includes(q)) ||
+      (item.summary && item.summary.toLowerCase().includes(q))
+    );
+  }
+
+  return list;
+});
+
+const isNewsModalOpen = ref(false);
+const editingNewsItem = ref(null);
+const isNewsSubmitting = ref(false);
+const newsFormError = ref(null);
+const newsFormSuccess = ref(null);
+
+const defaultNewsForm = {
+  title: '',
+  title_ar: '',
+  slug: '',
+  type: 'event',
+  category: 'Event',
+  event_date: '',
+  event_time: '5:00 PM – 10:00 PM',
+  location: 'Veneno Auto Care Center, Musaffah M37, Abu Dhabi',
+  location_ar: 'مركز فينينو للعناية بالسيارات، مصفح M37، أبوظبي',
+  summary: '',
+  summary_ar: '',
+  content: '',
+  content_ar: '',
+  image_url: '/images/hammer/Hammer1.jpeg',
+  image: null,
+  badge: 'Upcoming Event',
+  badge_ar: 'فعالية قادمة',
+  status: 'published',
+  is_featured: false,
+  is_past: false,
+  prize_podium: '',
+};
+
+const newsForm = ref({ ...defaultNewsForm });
+
+const openCreateNewsModal = () => {
+  editingNewsItem.value = null;
+  newsForm.value = { ...defaultNewsForm };
+  newsFormError.value = null;
+  newsFormSuccess.value = null;
+  isNewsModalOpen.value = true;
+};
+
+const openEditNewsModal = (item) => {
+  editingNewsItem.value = item;
+  newsForm.value = {
+    title: item.title || '',
+    title_ar: item.title_ar || '',
+    slug: item.slug || '',
+    type: item.type || 'event',
+    category: item.category || 'Event',
+    event_date: item.event_date ? item.event_date.split('T')[0] : '',
+    event_time: item.event_time || '',
+    location: item.location || '',
+    location_ar: item.location_ar || '',
+    summary: item.summary || '',
+    summary_ar: item.summary_ar || '',
+    content: item.content || '',
+    content_ar: item.content_ar || '',
+    image_url: item.image_url || '',
+    image: null,
+    badge: item.badge || '',
+    badge_ar: item.badge_ar || '',
+    status: item.status || 'published',
+    is_featured: !!item.is_featured,
+    is_past: !!item.is_past,
+    prize_podium: item.prize_podium || '',
+  };
+  newsFormError.value = null;
+  newsFormSuccess.value = null;
+  isNewsModalOpen.value = true;
+};
+
+const handleNewsImageFile = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    newsForm.value.image = file;
+    newsForm.value.image_url = URL.createObjectURL(file);
+  }
+};
+
+const submitNewsForm = () => {
+  newsFormError.value = null;
+  newsFormSuccess.value = null;
+
+  if (!newsForm.value.title.trim()) {
+    newsFormError.value = 'Please provide a title in English.';
+    return;
+  }
+  if (!newsForm.value.summary.trim()) {
+    newsFormError.value = 'Please provide a brief summary.';
+    return;
+  }
+  if (!newsForm.value.content.trim()) {
+    newsFormError.value = 'Please provide the article or event content.';
+    return;
+  }
+
+  isNewsSubmitting.value = true;
+
+  const formData = new FormData();
+  for (const [key, val] of Object.entries(newsForm.value)) {
+    if (key === 'image' && val) {
+      formData.append('image', val);
+    } else if (typeof val === 'boolean') {
+      formData.append(key, val ? '1' : '0');
+    } else if (val !== null && val !== undefined) {
+      formData.append(key, val);
+    }
+  }
+
+  const endpoint = editingNewsItem.value
+    ? route('dashboard.news-events.update', editingNewsItem.value.id)
+    : route('dashboard.news-events.store');
+
+  router.post(endpoint, formData, {
+    forceFormData: true,
+    preserveScroll: true,
+    onSuccess: () => {
+      isNewsSubmitting.value = false;
+      isNewsModalOpen.value = false;
+      newsFormSuccess.value = 'News/Event entry has been saved successfully!';
+    },
+    onError: (errors) => {
+      isNewsSubmitting.value = false;
+      newsFormError.value = Object.values(errors)[0] || 'An error occurred while saving.';
+    },
+    onFinish: () => {
+      isNewsSubmitting.value = false;
+    }
+  });
+};
+
+const handleDeleteNews = (item) => {
+  if (confirm(`Are you sure you want to delete "${item.title}"?`)) {
+    router.delete(route('dashboard.news-events.destroy', item.id), {
+      preserveScroll: true,
+    });
+  }
+};
+
+const handleToggleFeaturedNews = (item) => {
+  router.patch(route('dashboard.news-events.featured', item.id), {}, {
+    preserveScroll: true,
+  });
+};
 </script>
 
 <template>
@@ -831,6 +1016,15 @@ const handleLogout = () => {
         >
           <Trophy class="w-3.5 h-3.5" />
           <span>Hammer Event ({{ (hammerAudiences?.length || 0) + (hammerRegistrations?.length || 0) }})</span>
+        </button>
+
+        <button
+          @click="currentTab = 'news'"
+          class="py-3 px-5 border-b-2 font-bold transition-all flex items-center gap-2 cursor-pointer"
+          :class="currentTab === 'news' ? 'text-amber-400 border-amber-400 bg-amber-500/10 rounded-t-xl' : 'text-zinc-400 border-transparent hover:text-zinc-200'"
+        >
+          <Newspaper class="w-3.5 h-3.5 text-amber-400" />
+          <span>News & Events ({{ newsEvents?.length || 0 }})</span>
         </button>
       </div>
 
@@ -1492,6 +1686,261 @@ const handleLogout = () => {
           </div>
         </div>
       </div>
+
+      <!-- ========================================================= -->
+      <!-- TAB 4: NEWS & EVENTS COMMAND HUB                          -->
+      <!-- ========================================================= -->
+      <div v-if="currentTab === 'news'" class="space-y-6 animate-in fade-in duration-200">
+        <div class="rounded-3xl border border-zinc-800/90 bg-zinc-950/70 p-6 space-y-6 shadow-2xl">
+          
+          <!-- Top Header & Primary Action Button -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500/20 to-red-600/20 border border-amber-500/40 text-amber-400 flex items-center justify-center shrink-0">
+                  <Newspaper class="w-5 h-5 text-amber-400" />
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-lg font-black uppercase text-white font-display">News & Events Studio</h3>
+                    <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-mono font-bold">
+                      {{ newsEvents?.length || 0 }} Items
+                    </span>
+                  </div>
+                  <p class="text-xs text-zinc-400">Curate previous and upcoming competitions, exhibition showcases, and auto care announcements</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top Actions: Link to Public Page + Add New Button -->
+            <div class="flex flex-wrap items-center gap-2.5">
+              <a
+                href="/news-events"
+                target="_blank"
+                class="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 hover:text-white text-xs font-mono flex items-center gap-1.5 transition-colors"
+              >
+                <span>Live Public Page</span>
+                <ExternalLink class="w-3.5 h-3.5 text-zinc-400" />
+              </a>
+
+              <button
+                v-if="authUser.role === 'super_admin'"
+                type="button"
+                @click="openCreateNewsModal"
+                class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-600 hover:brightness-110 text-white font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-950/60 transition active:scale-95 cursor-pointer"
+              >
+                <Plus class="w-4 h-4" />
+                <span>Add News / Event</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Cards Strip -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+            <div class="p-3.5 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+              <span class="text-zinc-500 text-[10px] block uppercase">Total Entries</span>
+              <strong class="text-xl text-white font-bold">{{ newsEvents?.length || 0 }}</strong>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+              <span class="text-amber-400 text-[10px] block uppercase">Events & Challenges</span>
+              <strong class="text-xl text-amber-300 font-bold">{{ newsEvents?.filter(i => i.type === 'event').length || 0 }}</strong>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+              <span class="text-blue-400 text-[10px] block uppercase">News & Articles</span>
+              <strong class="text-xl text-blue-300 font-bold">{{ newsEvents?.filter(i => i.type === 'news').length || 0 }}</strong>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-zinc-900/80 border border-zinc-800">
+              <span class="text-emerald-400 text-[10px] block uppercase">Published Live</span>
+              <strong class="text-xl text-emerald-400 font-bold">{{ newsEvents?.filter(i => i.status === 'published').length || 0 }}</strong>
+            </div>
+          </div>
+
+          <!-- Filter & Search Controls -->
+          <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+            <div class="flex flex-wrap items-center gap-1.5 p-1 bg-zinc-950 rounded-xl border border-zinc-800 text-xs font-mono">
+              <button
+                v-for="flt in [
+                  { id: 'all', label: `All (${newsEvents?.length || 0})` },
+                  { id: 'event', label: `Events (${newsEvents?.filter(i => i.type === 'event').length || 0})` },
+                  { id: 'news', label: `News (${newsEvents?.filter(i => i.type === 'news').length || 0})` },
+                  { id: 'published', label: `Published (${newsEvents?.filter(i => i.status === 'published').length || 0})` },
+                  { id: 'draft', label: `Drafts (${newsEvents?.filter(i => i.status === 'draft').length || 0})` },
+                ]"
+                :key="flt.id"
+                @click="newsTypeFilter = flt.id"
+                class="px-3 py-1.5 rounded-lg transition-colors font-medium cursor-pointer"
+                :class="newsTypeFilter === flt.id ? 'bg-zinc-800 text-white font-bold shadow-sm' : 'text-zinc-400 hover:text-zinc-200'"
+              >
+                {{ flt.label }}
+              </button>
+            </div>
+
+            <!-- Search -->
+            <div class="relative w-full md:w-80">
+              <Search class="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                v-model="newsSearch"
+                type="text"
+                placeholder="Search title, category, venue..."
+                class="w-full pl-10 pr-4 py-2 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 transition-colors font-mono"
+              />
+            </div>
+          </div>
+
+          <!-- News & Events Table -->
+          <div class="overflow-hidden rounded-2xl border border-zinc-800/90 bg-zinc-950/90 shadow-xl">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs font-mono">
+                <thead class="bg-zinc-900/90 text-zinc-400 uppercase tracking-wider text-[10px] border-b border-zinc-800">
+                  <tr>
+                    <th class="py-3.5 px-4">Visual / Title</th>
+                    <th class="py-3.5 px-4">Type & Category</th>
+                    <th class="py-3.5 px-4">Event Date / Venue</th>
+                    <th class="py-3.5 px-4">Status</th>
+                    <th class="py-3.5 px-4 text-center">Featured</th>
+                    <th class="py-3.5 px-4 text-center">Views</th>
+                    <th class="py-3.5 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-800/60">
+                  <tr
+                    v-for="item in filteredNewsList"
+                    :key="item.id"
+                    class="hover:bg-zinc-900/40 transition-colors group"
+                  >
+                    <!-- Visual & Title -->
+                    <td class="py-3.5 px-4">
+                      <div class="flex items-center gap-3">
+                        <div class="w-14 h-11 rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800 shrink-0">
+                          <img :src="item.image_url" :alt="item.title" class="w-full h-full object-cover" />
+                        </div>
+                        <div class="max-w-xs sm:max-w-md">
+                          <strong class="text-white font-sans text-xs sm:text-sm font-bold block truncate group-hover:text-amber-400 transition-colors">
+                            {{ item.title }}
+                          </strong>
+                          <span v-if="item.title_ar" class="text-[11px] text-zinc-500 block truncate" dir="rtl">
+                            {{ item.title_ar }}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Type & Category -->
+                    <td class="py-3.5 px-4">
+                      <div class="space-y-1">
+                        <span
+                          class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1"
+                          :class="item.type === 'event' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-blue-500/20 text-blue-300 border border-blue-500/40'"
+                        >
+                          <Flame v-if="item.type === 'event'" class="w-3 h-3" />
+                          <Newspaper v-else class="w-3 h-3" />
+                          <span>{{ item.type }}</span>
+                        </span>
+                        <div class="text-[10px] text-zinc-400">{{ item.category }}</div>
+                        <span v-if="item.badge" class="text-[9px] px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 block w-max">
+                          {{ item.badge }}
+                        </span>
+                      </div>
+                    </td>
+
+                    <!-- Date & Venue -->
+                    <td class="py-3.5 px-4">
+                      <div class="space-y-0.5">
+                        <div v-if="item.event_date" class="text-zinc-200 font-bold flex items-center gap-1.5">
+                          <Calendar class="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                          <span>{{ new Date(item.event_date).toLocaleDateString('en-GB') }}</span>
+                        </div>
+                        <div v-if="item.location" class="text-zinc-500 text-[11px] flex items-center gap-1.5 truncate max-w-[200px]">
+                          <MapPin class="w-3 h-3 text-red-500 shrink-0" />
+                          <span class="truncate">{{ item.location }}</span>
+                        </div>
+                        <div v-if="item.prize_podium" class="text-[10px] text-amber-400 truncate max-w-[200px]">
+                          🏆 {{ item.prize_podium }}
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- Status -->
+                    <td class="py-3.5 px-4">
+                      <span
+                        class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1"
+                        :class="item.status === 'published' ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/60' : 'bg-zinc-800 text-zinc-400 border border-zinc-700'"
+                      >
+                        <span class="w-1.5 h-1.5 rounded-full" :class="item.status === 'published' ? 'bg-emerald-400' : 'bg-zinc-500'"></span>
+                        <span>{{ item.status }}</span>
+                      </span>
+                    </td>
+
+                    <!-- Featured Toggle -->
+                    <td class="py-3.5 px-4 text-center">
+                      <button
+                        v-if="authUser.role === 'super_admin'"
+                        type="button"
+                        @click="handleToggleFeaturedNews(item)"
+                        class="p-1.5 rounded-lg border transition-all cursor-pointer"
+                        :class="item.is_featured ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 hover:bg-amber-500/30' : 'bg-zinc-900 text-zinc-600 border-zinc-800 hover:text-zinc-400'"
+                        :title="item.is_featured ? 'Featured on Top' : 'Set as Featured'"
+                      >
+                        <Star class="w-4 h-4 fill-current" />
+                      </button>
+                      <Star v-else class="w-4 h-4 mx-auto" :class="item.is_featured ? 'text-amber-400 fill-current' : 'text-zinc-700'" />
+                    </td>
+
+                    <!-- Views -->
+                    <td class="py-3.5 px-4 text-center text-zinc-400">
+                      {{ item.views_count || 0 }}
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="py-3.5 px-4 text-right">
+                      <div class="flex items-center justify-end gap-1.5">
+                        <!-- View Public Link -->
+                        <a
+                          :href="`/news-events/${item.slug}`"
+                          target="_blank"
+                          class="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 transition-colors"
+                          title="Open Live Public Page"
+                        >
+                          <ExternalLink class="w-3.5 h-3.5" />
+                        </a>
+
+                        <!-- Edit Button (Super Admin) -->
+                        <button
+                          v-if="authUser.role === 'super_admin'"
+                          type="button"
+                          @click="openEditNewsModal(item)"
+                          class="p-2 rounded-xl bg-zinc-900 hover:bg-amber-950/60 text-zinc-300 hover:text-amber-300 border border-zinc-800 hover:border-amber-500/50 transition-colors cursor-pointer"
+                          title="Edit News/Event Entry"
+                        >
+                          <Edit3 class="w-3.5 h-3.5" />
+                        </button>
+
+                        <!-- Delete Button (Super Admin) -->
+                        <button
+                          v-if="authUser.role === 'super_admin'"
+                          type="button"
+                          @click="handleDeleteNews(item)"
+                          class="p-2 rounded-xl bg-zinc-900 hover:bg-red-950/80 text-zinc-500 hover:text-red-400 border border-zinc-800 hover:border-red-500/50 transition-colors cursor-pointer"
+                          title="Delete Entry"
+                        >
+                          <Trash2 class="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr v-if="filteredNewsList.length === 0">
+                    <td colspan="7" class="py-12 text-center text-zinc-500 font-mono">
+                      No news or event entries found matching your filter criteria.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </main>
 
     <!-- ADIHEX WhatsApp Outreach Modal -->
@@ -2053,6 +2502,355 @@ const handleLogout = () => {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- Super Admin Create / Edit News & Event Modal -->
+    <!-- ========================================== -->
+    <div
+      v-if="isNewsModalOpen"
+      class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+    >
+      <div class="w-full max-w-3xl rounded-3xl border border-zinc-700/90 bg-[#0d0d12] p-6 sm:p-8 shadow-2xl shadow-black/95 space-y-6 max-h-[92vh] overflow-y-auto">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500/20 to-red-600/20 text-amber-400 flex items-center justify-center border border-amber-500/40 shrink-0">
+              <Newspaper class="w-5 h-5" />
+            </div>
+            <div>
+              <h3 class="text-base font-black text-white tracking-tight uppercase font-display">
+                {{ editingNewsItem ? 'Edit News / Event Entry' : 'Create New News / Event' }}
+              </h3>
+              <p class="text-xs text-zinc-400 font-mono">Published to public website feed & event archive</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            @click="isNewsModalOpen = false"
+            class="w-8 h-8 rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+
+        <!-- Alert messages -->
+        <div v-if="newsFormError" class="p-3 rounded-xl bg-red-950/80 border border-red-800/80 text-red-200 text-xs font-mono flex items-center gap-2">
+          <AlertCircle class="w-4 h-4 text-red-400 shrink-0" />
+          <span>{{ newsFormError }}</span>
+        </div>
+
+        <form @submit.prevent="submitNewsForm" class="space-y-5 text-xs font-mono">
+          
+          <!-- Row 1: Type & Category & Status -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <!-- Type Selector -->
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Type *</label>
+              <select
+                v-model="newsForm.type"
+                class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white focus:outline-none focus:border-amber-400"
+              >
+                <option value="event">🔥 Event / Challenge</option>
+                <option value="news">📰 News / Announcement</option>
+              </select>
+            </div>
+
+            <!-- Category -->
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Category *</label>
+              <input
+                v-model="newsForm.category"
+                type="text"
+                placeholder="e.g. Challenge, Exhibition, Launch"
+                class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+                required
+              />
+            </div>
+
+            <!-- Status -->
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Status *</label>
+              <select
+                v-model="newsForm.status"
+                class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white focus:outline-none focus:border-amber-400"
+              >
+                <option value="published">🟢 Published Live</option>
+                <option value="draft">⚪ Draft (Hidden)</option>
+                <option value="archived">📁 Archived</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 2: Title (English & Arabic) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Title (English) *</label>
+              <input
+                v-model="newsForm.title"
+                type="text"
+                placeholder="e.g. Veneno Hammer Challenge — The Final"
+                class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+                required
+              />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Title (Arabic / العربية)</label>
+              <input
+                v-model="newsForm.title_ar"
+                type="text"
+                dir="rtl"
+                placeholder="مثال: تحدي مطرقة فينينو — النهائي الكبير"
+                class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+              />
+            </div>
+          </div>
+
+          <!-- Row 3: Event Date, Timing & Prize Podium (If Event) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-zinc-950/80 border border-zinc-800">
+            <div>
+              <label class="text-[11px] font-bold text-amber-400 uppercase block mb-1.5">Event Date</label>
+              <input
+                v-model="newsForm.event_date"
+                type="date"
+                class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white focus:outline-none focus:border-amber-400"
+              />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-amber-400 uppercase block mb-1.5">Event Timing</label>
+              <input
+                v-model="newsForm.event_time"
+                type="text"
+                placeholder="e.g. 5:00 PM – 10:00 PM"
+                class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+              />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-amber-400 uppercase block mb-1.5">Prize Podium / Highlight</label>
+              <input
+                v-model="newsForm.prize_podium"
+                type="text"
+                placeholder="e.g. 1st Place: AED 15,000 Cash"
+                class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+              />
+            </div>
+          </div>
+
+          <!-- Row 4: Location (English & Arabic) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Location (English)</label>
+              <input
+                v-model="newsForm.location"
+                type="text"
+                placeholder="e.g. Veneno Auto Care Center, Musaffah M37, Abu Dhabi"
+                class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+              />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Location (Arabic / العربية)</label>
+              <input
+                v-model="newsForm.location_ar"
+                type="text"
+                dir="rtl"
+                placeholder="مثال: مركز فينينو للعناية بالسيارات، مصفح M37، أبوظبي"
+                class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+              />
+            </div>
+          </div>
+
+          <!-- Row 5: Badge Tag (English & Arabic) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Badge / Ribbon (English)</label>
+              <input
+                v-model="newsForm.badge"
+                type="text"
+                placeholder="e.g. Concluded Event, Upcoming, New Release"
+                class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+              />
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Badge / Ribbon (Arabic)</label>
+              <input
+                v-model="newsForm.badge_ar"
+                type="text"
+                dir="rtl"
+                placeholder="مثال: فعالية مكتملة، قريباً، إصدار جديد"
+                class="w-full px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+              />
+            </div>
+          </div>
+
+          <!-- Row 6: Summary (English & Arabic) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Summary Excerpt (English) *</label>
+              <textarea
+                v-model="newsForm.summary"
+                rows="3"
+                placeholder="Brief 1-2 sentence overview for the cards feed..."
+                class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400 resize-none"
+                required
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Summary Excerpt (Arabic)</label>
+              <textarea
+                v-model="newsForm.summary_ar"
+                rows="3"
+                dir="rtl"
+                placeholder="ملخص قصير من جملتين يظهر في واجهة البطاقات..."
+                class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400 resize-none"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Row 7: Full Story Content (English & Arabic) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Full Story / Recap (English) *</label>
+              <textarea
+                v-model="newsForm.content"
+                rows="5"
+                placeholder="Full article content, competition details, background, results..."
+                class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+                required
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="text-[11px] font-bold text-zinc-300 uppercase block mb-1.5">Full Story / Recap (Arabic)</label>
+              <textarea
+                v-model="newsForm.content_ar"
+                rows="5"
+                dir="rtl"
+                placeholder="نص المقال الكامل، تفاصيل التحدي، النتائج، مجريات الفعالية..."
+                class="w-full p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Row 8: Image & Upload -->
+          <div class="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-3">
+            <label class="text-[11px] font-bold text-zinc-300 uppercase block">Visual / Artwork Image</label>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="text-[10px] text-zinc-400 uppercase block mb-1">Image URL or Preset Path</label>
+                <input
+                  v-model="newsForm.image_url"
+                  type="text"
+                  placeholder="/images/hammer/Hammer1.jpeg"
+                  class="w-full px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400 text-xs"
+                />
+
+                <!-- Preset Quick Buttons -->
+                <div class="flex flex-wrap gap-1.5 mt-2">
+                  <button
+                    type="button"
+                    @click="newsForm.image_url = '/images/hammer/Hammer1.jpeg'"
+                    class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-[10px] text-zinc-400 hover:text-white border border-zinc-800"
+                  >
+                    Hammer 1
+                  </button>
+                  <button
+                    type="button"
+                    @click="newsForm.image_url = '/images/hammer/Hammer3.jpeg'"
+                    class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-[10px] text-zinc-400 hover:text-white border border-zinc-800"
+                  >
+                    Hammer 3
+                  </button>
+                  <button
+                    type="button"
+                    @click="newsForm.image_url = '/images/main-branch.webp'"
+                    class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-[10px] text-zinc-400 hover:text-white border border-zinc-800"
+                  >
+                    Main Branch
+                  </button>
+                  <button
+                    type="button"
+                    @click="newsForm.image_url = '/images/services/ppf/IMG_5968.JPG'"
+                    class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-[10px] text-zinc-400 hover:text-white border border-zinc-800"
+                  >
+                    PPF Studio
+                  </button>
+                </div>
+              </div>
+
+              <!-- File Upload -->
+              <div>
+                <label class="text-[10px] text-zinc-400 uppercase block mb-1">Or Upload Custom Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  @change="handleNewsImageFile"
+                  class="w-full text-xs text-zinc-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-mono file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <!-- Image Preview -->
+            <div v-if="newsForm.image_url" class="mt-2 h-28 rounded-xl overflow-hidden border border-zinc-800 w-max bg-zinc-900">
+              <img :src="newsForm.image_url" alt="Preview" class="h-full object-cover" />
+            </div>
+          </div>
+
+          <!-- Row 9: Options: Featured & Concluded Past -->
+          <div class="flex flex-wrap items-center gap-6 p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800">
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                v-model="newsForm.is_featured"
+                type="checkbox"
+                class="rounded border-zinc-700 bg-zinc-900 text-amber-500 focus:ring-amber-400 w-4 h-4 cursor-pointer"
+              />
+              <span class="text-xs font-bold text-amber-400 flex items-center gap-1">
+                <Star class="w-3.5 h-3.5 fill-current" />
+                <span>Feature in Spotlight Hero Banner</span>
+              </span>
+            </label>
+
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                v-model="newsForm.is_past"
+                type="checkbox"
+                class="rounded border-zinc-700 bg-zinc-900 text-red-500 focus:ring-red-400 w-4 h-4 cursor-pointer"
+              />
+              <span class="text-xs text-zinc-300">
+                Mark as Concluded / Past Event Archive
+              </span>
+            </label>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800">
+            <button
+              type="button"
+              @click="isNewsModalOpen = false"
+              class="px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              :disabled="isNewsSubmitting"
+              class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-red-500 to-amber-600 hover:brightness-110 text-white font-bold uppercase tracking-wider shadow-lg shadow-red-950/50 transition disabled:opacity-50 cursor-pointer flex items-center gap-2"
+            >
+              <Plus v-if="!editingNewsItem" class="w-4 h-4" />
+              <Edit3 v-else class="w-4 h-4" />
+              <span>{{ isNewsSubmitting ? 'Saving Entry...' : (editingNewsItem ? 'Update Entry' : 'Publish Entry') }}</span>
+            </button>
+          </div>
+
+        </form>
       </div>
     </div>
 

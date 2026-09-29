@@ -19,7 +19,8 @@ import {
   ExternalLink,
   Sun,
   SlidersHorizontal,
-  CircleDot
+  CircleDot,
+  Calendar
 } from 'lucide-vue-next';
 import { useI18n } from '../i18n';
 
@@ -276,12 +277,12 @@ const scrollToTop = () => {
               </a>
             </li>
             <li class="pt-1.5">
-              <Link :href="currentLocale === 'ar' ? '/ar/hammer-challenge' : '/hammer-challenge'" class="p-2 rounded-xl bg-gradient-to-r from-lime-500/15 via-zinc-900/50 to-zinc-900 border border-[#a3e635]/40 hover:border-[#a3e635] text-[#a3e635] hover:text-white transition-all flex items-center justify-between group">
+              <Link :href="currentLocale === 'ar' ? '/ar/news-events' : '/news-events'" class="p-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-red-500/50 text-zinc-300 hover:text-white transition-all flex items-center justify-between group">
                 <span class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-full bg-[#a3e635] animate-ping"></span>
-                  <span class="font-bold font-mono text-[11px]">{{ currentLocale === 'ar' ? 'تحدي المطرقة • النهائي' : 'HAMMER CHALLENGE • FINAL' }}</span>
+                  <Calendar class="w-3.5 h-3.5 text-red-500 group-hover:scale-110 transition-transform" />
+                  <span class="font-bold text-[11px] uppercase tracking-wider">{{ currentLocale === 'ar' ? 'الأخبار والفعاليات' : 'News & Events' }}</span>
                 </span>
-                <ArrowUpRight class="w-3 h-3 text-[#a3e635] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform rtl:rotate-90" />
+                <ArrowUpRight class="w-3 h-3 text-zinc-400 group-hover:text-red-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all rtl:rotate-90" />
               </Link>
             </li>
           </ul>

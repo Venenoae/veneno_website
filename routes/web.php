@@ -7,12 +7,23 @@ use App\Http\Controllers\TechnicianPortalController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdihexController;
 use App\Http\Controllers\HammerChallengeController;
+use App\Http\Controllers\NewsEventController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 // Clean Primary Storefront Routes (In-Place Multilingual - Zero 404s)
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
 Route::get('/services/{slug}', [StorefrontController::class, 'serviceDetail'])->name('service.detail');
+
+// Public News & Events Showcase Hub & Detail Pages
+Route::get('/news-events', [NewsEventController::class, 'index'])->name('news-events.index');
+Route::get('/news-events/{slug}', [NewsEventController::class, 'show'])->name('news-events.show');
+Route::get('/{locale}/news-events', [NewsEventController::class, 'index'])->where('locale', 'en|ar');
+Route::get('/{locale}/news-events/{slug}', [NewsEventController::class, 'show'])->where('locale', 'en|ar');
+Route::redirect('/events', '/news-events');
+Route::redirect('/{locale}/events', '/{locale}/news-events')->where('locale', 'en|ar');
+Route::redirect('/news', '/news-events');
+Route::redirect('/{locale}/news', '/{locale}/news-events')->where('locale', 'en|ar');
 
 // ADIHEX 2026 Campaign (Concluded - All Public URLs Redirected to Storefront)
 Route::redirect('/adihex', '/')->name('adihex.index');
@@ -137,6 +148,14 @@ Route::middleware(['auth'])->group(function () {
 
         // Staff Password Reset (Strictly Super Admin ONLY - Cannot target Super Admins)
         Route::middleware(['role:super_admin'])->post('/users/{user}/reset-password', [DashboardController::class, 'resetUserPassword'])->name('dashboard.users.reset-password');
+
+        // News & Events Management (Super Admin ONLY)
+        Route::middleware(['role:super_admin'])->group(function () {
+            Route::post('/news-events', [NewsEventController::class, 'store'])->name('dashboard.news-events.store');
+            Route::post('/news-events/{newsEvent}', [NewsEventController::class, 'update'])->name('dashboard.news-events.update');
+            Route::patch('/news-events/{newsEvent}/featured', [NewsEventController::class, 'toggleFeatured'])->name('dashboard.news-events.featured');
+            Route::delete('/news-events/{newsEvent}', [NewsEventController::class, 'destroy'])->name('dashboard.news-events.destroy');
+        });
     });
 
     // Authenticated Management Actions for ADIHEX & Hammer Challenge

@@ -119,18 +119,16 @@ const scrollTo = (elementId) => {
             {{ t('nav.certificates') }}
           </a>
 
+          <Link 
+            :href="currentLocale === 'ar' ? '/ar/news-events' : '/news-events'" 
+            class="text-xs font-semibold uppercase tracking-wider text-zinc-300 hover:text-white transition-colors cursor-pointer"
+          >
+            {{ t('nav.newsEvents') }}
+          </Link>
+
           <a href="#contact" @click.prevent="scrollTo('contact')" class="text-xs font-semibold uppercase tracking-wider text-zinc-300 hover:text-white transition-colors cursor-pointer">
             {{ t('nav.contact') }}
           </a>
-
-          <!-- Hammer Challenge Special Event Link -->
-          <Link 
-            :href="currentLocale === 'ar' ? '/ar/hammer-challenge' : '/hammer-challenge'" 
-            class="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-lime-500/20 via-emerald-500/15 to-lime-500/20 border border-[#a3e635]/50 text-[#a3e635] hover:text-white hover:border-[#a3e635] text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-sm shadow-lime-500/10 hover:shadow-lime-500/30 cursor-pointer"
-          >
-            <span class="w-2 h-2 rounded-full bg-[#a3e635] animate-ping"></span>
-            <span>{{ t('nav.hammer') }}</span>
-          </Link>
         </nav>
 
         <!-- Right Side: Language Switcher & Get a Quote CTA -->
@@ -218,23 +216,17 @@ const scrollTo = (elementId) => {
     <div v-if="isMobileMenuOpen" class="xl:hidden glass-panel border-b border-zinc-800 px-6 py-6 space-y-4 animate-in fade-in slide-in-from-top-4 duration-200">
       <Link href="/" @click="isMobileMenuOpen = false" class="block text-base font-semibold text-zinc-200">{{ t('nav.home') }}</Link>
       
-      <!-- Hammer Challenge Mobile Highlight -->
-      <Link 
-        :href="currentLocale === 'ar' ? '/ar/hammer-challenge' : '/hammer-challenge'" 
-        @click="isMobileMenuOpen = false" 
-        class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-lime-500/20 via-zinc-900 to-zinc-900 border border-[#a3e635]/40 text-[#a3e635] font-bold text-sm"
-      >
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-[#a3e635] animate-ping"></span>
-          <span>{{ t('nav.hammer') }}</span>
-        </div>
-        <span class="text-[10px] px-2 py-0.5 rounded-full bg-lime-950/60 text-[#a3e635] border border-[#a3e635]/40 font-mono">12 SEPT</span>
-      </Link>
-
       <a href="#about" @click.prevent="scrollTo('about')" class="block text-base font-semibold text-zinc-200">{{ t('nav.about') }}</a>
       <a href="#why-us" @click.prevent="scrollTo('why-us')" class="block text-base font-semibold text-zinc-200">{{ t('nav.whyUs') }}</a>
       <a href="#services" @click.prevent="scrollTo('services')" class="block text-base font-semibold text-zinc-200">{{ t('nav.services') }}</a>
       <a href="#certificates" @click.prevent="scrollTo('certificates')" class="block text-base font-semibold text-zinc-200">{{ t('nav.certificates') }}</a>
+      <Link 
+        :href="currentLocale === 'ar' ? '/ar/news-events' : '/news-events'" 
+        @click="isMobileMenuOpen = false" 
+        class="block text-base font-semibold text-zinc-200 hover:text-red-400"
+      >
+        {{ t('nav.newsEvents') }}
+      </Link>
       <a href="#contact" @click.prevent="scrollTo('contact')" class="block text-base font-semibold text-zinc-200">{{ t('nav.contact') }}</a>
       
       <div class="py-2 border-y border-zinc-800/80 space-y-2">
